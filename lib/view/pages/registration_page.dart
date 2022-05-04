@@ -1,6 +1,8 @@
+import 'package:finalyearproject/services/auth_services.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
 import 'package:finalyearproject/view/pages/posts/posts_page.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class RegistrationPage extends StatefulWidget {
   @override
@@ -10,6 +12,14 @@ class RegistrationPage extends StatefulWidget {
 class _RegistrationPageState extends State<RegistrationPage> {
   bool isHover = false;
   bool isVisible = false;
+
+  Object? accountType = 1;
+
+  String account = 'Community';
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,27 +128,27 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(16.0, 16, 16, 0),
-                    child: Text(
-                      'User name',
-                      style: TextStyle(color: Colors.white, fontSize: 18),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
-                    child: TextField(
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: 'User name',
-                        hintStyle: TextStyle(color: Colors.grey[400]),
-                        suffixIcon: Icon(
-                          Icons.person,
-                          color: Colors.grey[300],
-                        ),
-                      ),
-                    ),
-                  ),
+                  // const Padding(
+                  //   padding: EdgeInsets.fromLTRB(16.0, 16, 16, 0),
+                  //   child: Text(
+                  //     'User name',
+                  //     style: TextStyle(color: Colors.white, fontSize: 18),
+                  //   ),
+                  // ),
+                  // Padding(
+                  //   padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
+                  //   child: TextField(
+                  //     style: const TextStyle(color: Colors.white),
+                  //     decoration: InputDecoration(
+                  //       hintText: 'User name',
+                  //       hintStyle: TextStyle(color: Colors.grey[400]),
+                  //       suffixIcon: Icon(
+                  //         Icons.person,
+                  //         color: Colors.grey[300],
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   const Padding(
                     padding: EdgeInsets.fromLTRB(16.0, 16, 16, 0),
                     child: Text(
@@ -149,6 +159,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
                     child: TextField(
+                      controller: _emailController,
                       style: const TextStyle(color: Colors.white),
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
@@ -173,6 +184,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
                     child: TextField(
+                      controller: _passwordController,
                       style: const TextStyle(color: Colors.white),
                       obscureText: isVisible ? false : true,
                       decoration: InputDecoration(
@@ -192,11 +204,84 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       ),
                     ),
                   ),
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(
+                      child: Text(
+                        'Account type',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Community',
+                              style: TextStyle(
+                                  fontSize: 12.0, color: Colors.grey[400]),
+                            ),
+                            Radio(
+                              value: 1,
+                              groupValue: accountType,
+                              onChanged: (val) {
+                                setState(() {
+                                  accountType = val;
+                                  account = 'Community';
+                                });
+                              },
+                            ),
+                            // more widgets ...
+                          ]),
+                      Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Clinical Staff',
+                              style: TextStyle(
+                                  fontSize: 12.0, color: Colors.grey[400]),
+                            ),
+                            Radio(
+                              value: 2,
+                              groupValue: accountType,
+                              onChanged: (val) {
+                                setState(() {
+                                  accountType = val;
+                                  account = 'Clinical staff';
+                                });
+                              },
+                            ),
+                            // more widgets ...
+                          ]),
+                    ],
+                  ),
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
                       child: ElevatedButton(
                         onPressed: () {
+                          AuthServices(
+                            email: _emailController.text,
+                            password: _passwordController.text,
+                            accountType: account,
+                          ).register();
+
+                          Get.snackbar(
+                              "Message", "User account successfully created.",
+                              snackPosition: SnackPosition.BOTTOM,
+                              borderRadius: 20,
+                              duration: const Duration(
+                                seconds: 4,
+                              ),
+                              margin: const EdgeInsets.all(16),
+                              isDismissible: true,
+                              dismissDirection: DismissDirection.horizontal,
+                              forwardAnimationCurve: Curves.easeInOutBack);
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
