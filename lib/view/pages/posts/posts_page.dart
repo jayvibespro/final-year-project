@@ -1,3 +1,4 @@
+import 'package:finalyearproject/services/post_service.dart';
 import 'package:finalyearproject/view/pages/home_chat_page.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
 import 'package:finalyearproject/widgets/post_container.dart';
@@ -16,6 +17,8 @@ class PostsPage extends StatefulWidget {
 
 class _PostsPageState extends State<PostsPage> {
   bool isHover = false;
+
+  final TextEditingController _postController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -237,10 +240,11 @@ class _PostsPageState extends State<PostsPage> {
                         height: 30,
                       ),
                       Container(
-                        child: const TextField(
+                        child: TextField(
+                          controller: _postController,
                           minLines: 5,
                           maxLines: 8,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             hintText: 'Write here...',
                             enabledBorder: OutlineInputBorder(
                               borderRadius:
@@ -273,6 +277,12 @@ class _PostsPageState extends State<PostsPage> {
                       ),
                       ElevatedButton(
                         onPressed: () {
+                          PostService(
+                                  post: _postController.text,
+                                  date: '12/07/2022',
+                                  likes: '0')
+                              .addPost();
+
                           Navigator.pop(context);
                         },
                         child: const Padding(

@@ -1,3 +1,4 @@
+import 'package:finalyearproject/services/auth_services.dart';
 import 'package:finalyearproject/view/pages/posts/posts_page.dart';
 import 'package:finalyearproject/view/pages/registration_page.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,10 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool isHover = false;
   bool isVisible = false;
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,6 +133,7 @@ class _LoginPageState extends State<LoginPage> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
                     child: TextField(
+                      controller: _emailController,
                       style: const TextStyle(color: Colors.white),
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
@@ -153,6 +159,7 @@ class _LoginPageState extends State<LoginPage> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
                     child: TextField(
+                      controller: _passwordController,
                       style: const TextStyle(color: Colors.white),
                       obscureText: isVisible ? false : true,
                       decoration: InputDecoration(
@@ -177,6 +184,11 @@ class _LoginPageState extends State<LoginPage> {
                       padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
                       child: ElevatedButton(
                         onPressed: () {
+                          AuthServices(
+                                  email: _emailController.text,
+                                  password: _passwordController.text)
+                              .login();
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
