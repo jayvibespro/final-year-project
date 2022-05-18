@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:finalyearproject/models/user_model.dart';
+import 'package:finalyearproject/models/selected_members.dart';
 import 'package:finalyearproject/services/group_chat_services.dart';
 import 'package:finalyearproject/view/pages/posts/posts_page.dart';
 import 'package:finalyearproject/view/pages/profile/profile_page.dart';
@@ -14,10 +14,12 @@ class SelectGroupMembers extends StatefulWidget {
     Key? key,
     required this.groupName,
     required this.groupDescription,
+    required this.members,
   }) : super(key: key);
 
   String groupName;
   String groupDescription;
+  List<LoadedMembers> members;
 
   @override
   State<SelectGroupMembers> createState() => _SelectGroupMembersState();
@@ -25,18 +27,9 @@ class SelectGroupMembers extends StatefulWidget {
 
 class _SelectGroupMembersState extends State<SelectGroupMembers> {
   bool isHover = false;
-  String userId = '';
 
-  List<UserModel> groupMembers = [];
   List<String> groupMembersIds = [];
-
-  bool imageIsInList(String url) {
-    if (groupMembersIds.contains(url)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+  List<MembersSelected> selectedMembers = [];
 
   final TextEditingController _searchController = TextEditingController();
 
@@ -44,40 +37,9 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
 
   final _db = FirebaseFirestore.instance;
 
-  selectGroupMembers() {
-    try {
-      return _db
-          .collection("users")
-          .where('user_id', isEqualTo: userId)
-          .snapshots()
-          .map((element) {
-        for (final DocumentSnapshot<Map<String, dynamic>> doc in element.docs) {
-          groupMembers.add(UserModel.fromDocumentSnapshot(doc: doc));
-          groupMembersIds.add(UserModel.fromDocumentSnapshot(doc: doc).userId);
-        }
-        return groupMembers;
-      });
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Stream<List<UserModel>> userStream() {
-    try {
-      return _db
-          .collection('users')
-          .where('user_id', isNotEqualTo: auth.currentUser?.uid)
-          .snapshots()
-          .map((element) {
-        final List<UserModel> dataFromFireStore = <UserModel>[];
-        for (final DocumentSnapshot<Map<String, dynamic>> doc in element.docs) {
-          dataFromFireStore.add(UserModel.fromDocumentSnapshot(doc: doc));
-        }
-        return dataFromFireStore;
-      });
-    } catch (e) {
-      rethrow;
-    }
+  @override
+  initState() {
+    super.initState();
   }
 
   @override
@@ -256,153 +218,107 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
               ),
               const Divider(),
               Expanded(
-                child: StreamBuilder<List<UserModel>>(
-                  stream: userStream(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(
-                        child: Text('No data Loaded...'),
-                      );
-                    } else if (snapshot.hasError) {
-                      return const Center(
-                        child: Text('An Error Occurred...'),
-                      );
-                    } else if (snapshot.hasData) {
-                      return ListView.builder(
-                          physics: const BouncingScrollPhysics(
-                            parent: AlwaysScrollableScrollPhysics(),
-                          ),
-                          itemCount: snapshot.data!.length,
-                          itemBuilder: (context, index) {
-                            UserModel? userSnapshot = snapshot.data![index];
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0, horizontal: 16),
-                              child: Container(
-                                padding: const EdgeInsets.all(8),
-                                child: CheckboxListTile(
-                                  title: Text('${userSnapshot.name}'),
-                                  subtitle: Text('${userSnapshot.email}'),
-                                  value: imageIsInList(userSnapshot.avatarUrl),
-                                  onChanged: (bool? value) {
-                                    if (imageIsInList(userSnapshot.avatarUrl) ==
-                                        false) {
-                                      setState(() {
-                                        userId = userSnapshot.userId;
-                                        groupMembers.add(userSnapshot);
-                                        groupMembersIds
-                                            .add(userSnapshot.userId);
-                                        userId = '';
-                                      });
-                                      selectGroupMembers();
-                                    } else {
-                                      setState(() {
-                                        groupMembers.remove(userSnapshot);
-                                        groupMembersIds
-                                            .remove(userSnapshot.userId);
-                                      });
-                                    }
-                                  },
-                                  secondary: const Icon(Icons.person),
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            );
-                          });
-                    } else {
-                      return const Center(
-                        child: Text('An Error Occurred...'),
-                      );
-                    }
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: widget.members.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8.0, horizontal: 16),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        child: CheckboxListTile(
+                          title: Text('${widget.members[index].memberName}'),
+                          subtitle:
+                              Text('${widget.members[index].memberEmail}'),
+                          value: widget.members[index].memberValue,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              widget.members[index].memberValue = value!;
+                            });
+                            groupMembersIds.add(widget.members[index].memberId);
+                            if (widget.members[index].memberValue == true) {
+                              selectedMembers.add(MembersSelected(
+                                memberId: widget.members[index].memberId,
+                                memberImage: widget.members[index].memberImage,
+                              ));
+                            } else if (widget.members[index].memberValue ==
+                                false) {
+                              setState(() {
+                                selectedMembers.removeWhere((element) =>
+                                    element.memberId ==
+                                    widget.members[index].memberId);
+                                groupMembersIds
+                                    .remove(widget.members[index].memberId);
+                              });
+                            }
+                          },
+                          secondary: const Icon(Icons.person),
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    );
                   },
                 ),
               ),
               SizedBox(
-                height: 100,
+                height: 120,
                 child: Padding(
                   padding: const EdgeInsets.only(
-                      left: 32, right: 32, top: 16, bottom: 16),
-                  child: Row(
-                    children: [
-                      Container(
-                        child: StreamBuilder<List<UserModel>>(
-                          stream: selectGroupMembers(),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return const Center(
-                                child: Text('No Data Loaded...'),
-                              );
-                            } else if (snapshot.hasError) {
-                              return const Center(
-                                child: Text('An Error Occurred...'),
-                              );
-                            } else if (snapshot.hasData) {
-                              return ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  physics: const BouncingScrollPhysics(
-                                    parent: AlwaysScrollableScrollPhysics(),
-                                  ),
-                                  itemCount: snapshot.data!.length,
-                                  itemBuilder: (context, index) {
-                                    UserModel? userSnapshot =
-                                        snapshot.data![index];
-                                    return Stack(
-                                      children: [
-                                        Container(
-                                          width: 120,
-                                          height: 120,
-                                          child: const CircleAvatar(
-                                            radius: 36,
-                                            child: Icon(Icons.person),
-                                          ),
-                                        ),
-                                        Container(
-                                          width: 120,
-                                          height: 120,
-                                          child: Positioned(
-                                            child: InkWell(
-                                              onTap: () {
-                                                setState(() {
-                                                  groupMembersIds.remove(
-                                                      userSnapshot.userId);
-                                                  groupMembers
-                                                      .remove(userSnapshot);
-                                                });
-                                              },
-                                              child: const CircleAvatar(
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                radius: 20,
-                                                child: CircleAvatar(
-                                                  radius: 14,
-                                                  backgroundColor: Colors.blue,
-                                                  child: Icon(
-                                                    Icons.cancel_outlined,
-                                                    color: Colors.green,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            bottom: 0,
-                                            right: 0,
-                                          ),
-                                        ),
-                                      ],
-                                    );
+                      left: 8, right: 8, top: 16, bottom: 16),
+                  child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics(),
+                      ),
+                      itemCount: selectedMembers.length,
+                      itemBuilder: (context, index) {
+                        MembersSelected? userSelected = selectedMembers[index];
+
+                        return Stack(
+                          children: [
+                            const CircleAvatar(
+                              backgroundColor: Colors.white,
+                              radius: 60,
+                              child: Icon(
+                                Icons.person,
+                                size: 50,
+                              ),
+                            ),
+                            Positioned(
+                              child: InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    widget.members.forEach((element) {
+                                      if (element.memberId ==
+                                          userSelected.memberId) {
+                                        element.memberValue = false;
+                                      }
+                                    });
+                                    selectedMembers.remove(userSelected);
+                                    groupMembersIds
+                                        .remove(userSelected.memberId);
                                   });
-                            } else {
-                              return const Center(
-                                child: Text('An Error Occurred...'),
-                              );
-                            }
-                          },
-                        ),
-                      )
-                    ],
-                  ),
+                                },
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.grey[50],
+                                  radius: 20,
+                                  child: const Icon(
+                                    Icons.cancel_outlined,
+                                    color: Colors.green,
+                                    size: 30,
+                                  ),
+                                ),
+                              ),
+                              bottom: 0,
+                              right: 0,
+                            ),
+                          ],
+                        );
+                      }),
                 ),
               ),
               const Divider(),
@@ -413,7 +329,10 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
                   children: [
                     TextButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (context) => ChatPage()),
+                            (route) => false);
                       },
                       child: const Padding(
                         padding: EdgeInsets.all(16.0),
@@ -438,9 +357,12 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
                           ).createGroup();
                         }
                         groupMembersIds = [];
-                        groupMembers = [];
 
-                        Navigator.pop(context);
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => LoginPage()),
+                            (route) => false);
                       },
                       child: const Padding(
                         padding: EdgeInsets.all(16.0),

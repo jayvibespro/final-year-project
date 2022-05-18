@@ -6,8 +6,6 @@ class GroupChatServices {
   String? groupAdmin;
   String? groupDescription;
   String? message;
-
-  String? lastDate;
   String? date;
   String? groupImage;
   String? groupName;
@@ -21,7 +19,6 @@ class GroupChatServices {
     this.groupName,
     this.message,
     this.date,
-    this.lastDate,
     this.members,
     this.groupDescription,
     this.groupImage,
@@ -43,7 +40,7 @@ class GroupChatServices {
   sendMessage() async {
     await FirebaseFirestore.instance.collection('group_chat').doc(id).update({
       'last_message': message,
-      'last_date': lastDate,
+      'last_date': date,
     }).then((value) {
       FirebaseFirestore.instance
           .collection('group_chat')

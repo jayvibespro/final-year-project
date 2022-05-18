@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finalyearproject/models/group_chat_model.dart';
+import 'package:finalyearproject/models/selected_members.dart';
 import 'package:finalyearproject/models/single_chat_model.dart';
 import 'package:finalyearproject/models/user_model.dart';
 import 'package:finalyearproject/services/single_chat_services.dart';
@@ -77,6 +79,26 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  Stream<List<GroupChatConversationModel>> groupChatConversationStream() {
+    try {
+      return _db
+          .collection('group_chat')
+          .where('members', arrayContains: auth.currentUser?.uid)
+          .snapshots()
+          .map((element) {
+        final List<GroupChatConversationModel> dataFromFireStore =
+            <GroupChatConversationModel>[];
+        for (final DocumentSnapshot<Map<String, dynamic>> doc in element.docs) {
+          dataFromFireStore
+              .add(GroupChatConversationModel.fromDocumentSnapshot(doc: doc));
+        }
+        return dataFromFireStore;
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Widget currentWidget() {
     if (isChosenWidget == 0) {
       return StreamBuilder<List<SingleChatConversationModel>>(
@@ -112,9 +134,12 @@ class _ChatPageState extends State<ChatPage> {
                         trailing: Text('${userConversationSnapshot.lastDate}'),
                         onTap: () {
                           Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>  SingleChatMessagesPage(singleChatConversationModel: userConversationSnapshot,)));
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SingleChatMessagesPage(
+                                        singleChatConversationModel:
+                                            userConversationSnapshot,
+                                      )));
                         },
                       ),
                       decoration: BoxDecoration(
@@ -132,34 +157,60 @@ class _ChatPageState extends State<ChatPage> {
         },
       );
     } else if (isChosenWidget == 1) {
-      return ListView(
-        physics: const BouncingScrollPhysics(
-          parent: AlwaysScrollableScrollPhysics(),
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              child: ListTile(
-                title: const Text('All nurses from Rock_City'),
-                subtitle: const Text('Last message goes here...'),
-                trailing: const Text('May 21, 04:19'),
-                leading: const Icon(Icons.group),
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const GroupChatPage()));
-                },
-              ),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ],
+      return StreamBuilder<List<GroupChatConversationModel>>(
+        stream: groupChatConversationStream(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(
+              child: Text('No data Loaded...'),
+            );
+          } else if (snapshot.hasError) {
+            return const Center(
+              child: Text('An Error Occurred...'),
+            );
+          } else if (snapshot.hasData) {
+            return ListView.builder(
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
+                itemCount: snapshot.data!.length,
+                itemBuilder: (context, index) {
+                  GroupChatConversationModel? groupConversationSnapshot =
+                      snapshot.data![index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 16),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      child: ListTile(
+                        title: Text('${groupConversationSnapshot.groupName}'),
+                        subtitle:
+                            Text('${groupConversationSnapshot.lastMessage}'),
+                        leading: const Icon(Icons.group),
+                        trailing: Text('${groupConversationSnapshot.lastDate}'),
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => GroupChatPage(
+                                        groupChatConversationModel:
+                                            groupConversationSnapshot,
+                                      )));
+                        },
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  );
+                });
+          } else {
+            return const Center(
+              child: Text('An Error Occurred...'),
+            );
+          }
+        },
       );
     } else if (isChosenWidget == 2) {
       return Container(
@@ -442,11 +493,38 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          final FirebaseAuth auth = FirebaseAuth.instance;
+
+                          final _db = FirebaseFirestore.instance;
+                          List<LoadedMembers> membersLoaded = [];
+
+                          try {
+                            await _db
+                                .collection('users')
+                                .where('user_id',
+                                    isNotEqualTo: auth.currentUser?.uid)
+                                .get()
+                                .then((value) {
+                              value.docs.forEach((element) {
+                                membersLoaded.add(LoadedMembers(
+                                    memberId: element['user_id'],
+                                    memberImage: element['avatar_url'],
+                                    memberName: element['name'],
+                                    memberEmail: element['email'],
+                                    memberValue: false));
+                              });
+                              return membersLoaded;
+                            });
+                          } catch (e) {
+                            rethrow;
+                          }
+
                           Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => SelectGroupMembers(
+                                        members: membersLoaded,
                                         groupName: _groupNameController.text,
                                         groupDescription:
                                             _groupDescriptionController.text,

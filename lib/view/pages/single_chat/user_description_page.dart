@@ -60,8 +60,6 @@ class _UserDescriptionPageState extends State<UserDescriptionPage> {
               in element.docs) {
             dataFromFireStore.add(UserModel.fromDocumentSnapshot(doc: doc));
           }
-          print(dataFromFireStore);
-          print(widget.commentsModel!.ownerId);
           return dataFromFireStore;
         });
       } catch (e) {

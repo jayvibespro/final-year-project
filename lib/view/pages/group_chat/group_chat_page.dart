@@ -1,21 +1,53 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finalyearproject/models/group_chat_model.dart';
+import 'package:finalyearproject/services/group_chat_services.dart';
 import 'package:finalyearproject/view/pages/group_chat/group_description_page.dart';
 import 'package:finalyearproject/view/pages/home_chat_page.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
 import 'package:finalyearproject/view/pages/posts/posts_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../login_page.dart';
 import '../profile/profile_page.dart';
 
 class GroupChatPage extends StatefulWidget {
-  const GroupChatPage({Key? key}) : super(key: key);
-
+  GroupChatPage({Key? key, required this.groupChatConversationModel})
+      : super(key: key);
+  GroupChatConversationModel? groupChatConversationModel;
   @override
   State<GroupChatPage> createState() => _GroupChatPageState();
 }
 
 class _GroupChatPageState extends State<GroupChatPage> {
   bool isHover = false;
+
+  final TextEditingController _messageController = TextEditingController();
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  final _db = FirebaseFirestore.instance;
+
+  Stream<List<GroupChatMessagesModel>> groupChatMessagesStream() {
+    try {
+      return _db
+          .collection('group_chat')
+          .doc(widget.groupChatConversationModel?.id)
+          .collection('messages')
+          .snapshots()
+          .map((element) {
+        final List<GroupChatMessagesModel> dataFromFireStore =
+            <GroupChatMessagesModel>[];
+        for (final DocumentSnapshot<Map<String, dynamic>> doc in element.docs) {
+          dataFromFireStore
+              .add(GroupChatMessagesModel.fromDocumentSnapshot(doc: doc));
+        }
+        return dataFromFireStore;
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -193,16 +225,17 @@ class _GroupChatPageState extends State<GroupChatPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Text(
-                                    'Majamaa Wauguzi',
-                                    style: TextStyle(fontSize: 20),
+                                  Text(
+                                    '${widget.groupChatConversationModel?.groupName}',
+                                    style: const TextStyle(fontSize: 20),
                                   ),
                                   Flexible(
                                     child: Container(
                                       width: 400,
-                                      child: const Text(
-                                        'The group description will be displayed is this section of the page. So i am filling it with dummy data by now.',
-                                        style: TextStyle(color: Colors.black54),
+                                      child: Text(
+                                        '${widget.groupChatConversationModel?.groupDescription}',
+                                        style: const TextStyle(
+                                            color: Colors.black54),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         softWrap: false,
@@ -220,7 +253,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
                         IconButton(
                           onPressed: () {},
                           icon: const Icon(
-                            Icons.east_outlined,
+                            Icons.keyboard_arrow_right_outlined,
                             color: Colors.black54,
                           ),
                         ),
@@ -237,188 +270,84 @@ class _GroupChatPageState extends State<GroupChatPage> {
                 },
               ),
               Expanded(
-                child: ListView(children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 32),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
+                child: StreamBuilder<List<GroupChatMessagesModel>>(
+                  stream: groupChatMessagesStream(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: Text('No data Loaded...'),
+                      );
+                    } else if (snapshot.hasError) {
+                      return const Center(
+                        child: Text('An Error Occurred...'),
+                      );
+                    } else if (snapshot.hasData) {
+                      return ListView.builder(
+                          reverse: true,
+                          physics: const BouncingScrollPhysics(
+                            parent: AlwaysScrollableScrollPhysics(),
                           ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text(
-                                'This one will be a message received from the other user to the current logged in user.'),
-                          ),
-                        ),
-                      ),
-                      const Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 0, horizontal: 32),
-                        child: Text(
-                          '12:03 AM',
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 32),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text(
-                                'Welcome user to the current logged in user.'),
-                          ),
-                        ),
-                      ),
-                      const Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 0, horizontal: 32),
-                        child: Text(
-                          '12:24 AM',
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 32),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF82E0AA),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text(
-                              'This one will be a message sent by the current user(me).',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 0, horizontal: 32),
-                        child: Text(
-                          '12:12 AM',
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 32),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text(
-                                'Welcome user to the current logged in user.'),
-                          ),
-                        ),
-                      ),
-                      const Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 0, horizontal: 32),
-                        child: Text(
-                          '12:24 AM',
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 32),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF82E0AA),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text(
-                              'This one will be a message sent by me. Thank you!.',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 0, horizontal: 32),
-                        child: Text(
-                          '12:33 AM',
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 32),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text(
-                                'Welcome user to the current logged in user.'),
-                          ),
-                        ),
-                      ),
-                      const Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 0, horizontal: 32),
-                        child: Text(
-                          '12:24 AM',
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                      ),
-                    ],
-                  ),
-                ]),
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            GroupChatMessagesModel? messageSnapshot =
+                                snapshot.data![index];
+                            return Column(
+                              crossAxisAlignment: messageSnapshot.senderId ==
+                                      auth.currentUser!.uid
+                                  ? CrossAxisAlignment.end
+                                  : CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 16, horizontal: 32),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: messageSnapshot.senderId ==
+                                              auth.currentUser!.uid
+                                          ? const Color(0xFF82E0AA)
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Text(
+                                        '${messageSnapshot.message}',
+                                        style: TextStyle(
+                                            color: messageSnapshot.senderId ==
+                                                    auth.currentUser!.uid
+                                                ? Colors.white
+                                                : Colors.black54),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 32),
+                                  child: Text(
+                                    '12:12 AM',
+                                    style: TextStyle(color: Colors.black54),
+                                  ),
+                                ),
+                              ],
+                            );
+                          });
+                    } else {
+                      return const Center(
+                        child: Text('An Error Occurred...'),
+                      );
+                    }
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(32.0),
                 child: Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: TextField(
-                        decoration: InputDecoration(
+                        controller: _messageController,
+                        decoration: const InputDecoration(
                             hintText: 'Message...',
                             filled: true,
                             border: InputBorder.none,
@@ -429,7 +358,19 @@ class _GroupChatPageState extends State<GroupChatPage> {
                       width: 10,
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        GroupChatServices(
+                          id: widget.groupChatConversationModel?.id,
+                          message: _messageController.text,
+                          date: '04:45 PM',
+                          timeStamp: '',
+                          senderId: auth.currentUser!.uid,
+                        ).sendMessage();
+
+                        setState(() {
+                          _messageController.clear();
+                        });
+                      },
                       child: const Padding(
                         padding: EdgeInsets.all(16.0),
                         child: Text('send'),

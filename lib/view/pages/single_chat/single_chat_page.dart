@@ -35,7 +35,6 @@ class _SingleChatMessagesPageState extends State<SingleChatMessagesPage> {
           .collection('single_chat')
           .doc(widget.singleChatConversationModel?.id)
           .collection('messages')
-          // .where('members', arrayContains: auth.currentUser?.uid)
           .snapshots()
           .map((element) {
         final List<SingleChatMessagesModel> dataFromFireStore =
@@ -255,8 +254,6 @@ class _SingleChatMessagesPageState extends State<SingleChatMessagesPage> {
                   ),
                 ),
                 onTap: () {
-                  print('RECEIVER ID IS:');
-                  print(widget.singleChatConversationModel!.receiverId);
                   Navigator.push(
                       context,
                       MaterialPageRoute(
