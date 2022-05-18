@@ -4,12 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 class PostService {
   String? post;
   String? id;
-  String? likes;
+  int? likes;
+  int? commentCount;
   String? ownerName;
   String? ownerId;
   String? date;
 
   PostService({
+    this.commentCount,
     this.id,
     this.post,
     this.likes,
@@ -26,6 +28,7 @@ class PostService {
           await FirebaseFirestore.instance.collection('posts').add({
         'post': post,
         'likes': likes,
+        'comment_count': commentCount,
         'owner_id': _auth.currentUser?.uid,
         'owner_name': _auth.currentUser?.email,
         'date': date,
@@ -43,7 +46,7 @@ class PostService {
         'likes': likes,
       });
     } catch (e) {
-      print('An error occured.');
+      print('An error occurred.');
       print(e);
     }
   }

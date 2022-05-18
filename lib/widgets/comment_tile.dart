@@ -1,4 +1,4 @@
-import 'package:finalyearproject/view/pages/user_chat/user_description_page.dart';
+import 'package:finalyearproject/view/pages/single_chat/user_description_page.dart';
 import 'package:flutter/material.dart';
 
 class CommentTile extends StatelessWidget {
@@ -36,7 +36,8 @@ class CommentTile extends StatelessWidget {
                           ),
                           Text(
                             'Mwananyamala, Dar Es Salaam',
-                            style: TextStyle(color: Colors.black54, fontSize: 12),
+                            style:
+                                TextStyle(color: Colors.black54, fontSize: 12),
                           ),
                         ],
                       ),
@@ -62,15 +63,12 @@ class CommentTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-      
       ),
-      onTap: (){
+      onTap: () {
         Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const UserDescriptionPage()),
-                        );
+          context,
+          MaterialPageRoute(builder: (context) => UserDescriptionPage()),
+        );
       },
     );
   }

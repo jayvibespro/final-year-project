@@ -8,6 +8,7 @@ class UserModel {
   String facility;
   String region;
   String email;
+  String accountType;
   String avatarUrl;
   String phone;
   String gender;
@@ -15,6 +16,7 @@ class UserModel {
 
   UserModel({
     required this.id,
+    required this.accountType,
     required this.userId,
     required this.avatarUrl,
     required this.email,
@@ -38,9 +40,10 @@ class UserModel {
       phone: doc.data()!['phone'],
       gender: doc.data()!['gender'],
       region: doc.data()!['region'],
+      accountType: doc.data()!['account_type'],
       facility: doc.data()!['facility'],
       profession: doc.data()!['profession'],
-      idNumber: doc.data()!['idNumber'],
+      idNumber: doc.data()!['id_number'],
     );
   }
 }

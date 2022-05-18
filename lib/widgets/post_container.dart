@@ -111,7 +111,7 @@ class _PostContainerState extends State<PostContainer> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const CommentsPage()),
+          MaterialPageRoute(builder: (context) => CommentsPage()),
         );
       },
     );

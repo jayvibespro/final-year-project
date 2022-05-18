@@ -1,24 +1,48 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finalyearproject/models/user_model.dart';
 import 'package:finalyearproject/view/pages/posts/posts_page.dart';
 import 'package:finalyearproject/view/pages/profile/profile_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import 'home_chat_page.dart';
-import 'login_page.dart';
+import '../home_chat_page.dart';
+import '../login_page.dart';
 
-class SelectUsers extends StatefulWidget {
-  const SelectUsers({Key? key}) : super(key: key);
+class SelectReceiverPage extends StatefulWidget {
+  const SelectReceiverPage({Key? key}) : super(key: key);
 
   @override
-  State<SelectUsers> createState() => _SelectUsersState();
+  State<SelectReceiverPage> createState() => _SelectReceiverPageState();
 }
 
-class _SelectUsersState extends State<SelectUsers> {
+class _SelectReceiverPageState extends State<SelectReceiverPage> {
   bool isHover = false;
-  bool isSelected1 = false;
-  bool isSelected2 = false;
-  bool isSelected = false;
+  String receiverName = "Receiver's name";
 
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  final _db = FirebaseFirestore.instance;
+
+  Stream<List<UserModel>> userStream() {
+    try {
+      return _db
+          .collection('users')
+          .where('user_id', isNotEqualTo: auth.currentUser?.uid)
+          .snapshots()
+          .map((element) {
+        final List<UserModel> dataFromFireStore = <UserModel>[];
+        for (final DocumentSnapshot<Map<String, dynamic>> doc in element.docs) {
+          dataFromFireStore.add(UserModel.fromDocumentSnapshot(doc: doc));
+        }
+        return dataFromFireStore;
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -196,104 +220,84 @@ class _SelectUsersState extends State<SelectUsers> {
               ),
               const Divider(),
               Expanded(
-                child: ListView(children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 16),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      child: CheckboxListTile(
-                        title: const Text('Samia Minja Hassan'),
-                        subtitle: const Text('Chamwino, Dodoma'),
-                        value: isSelected1,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            isSelected1 = value!;
+                child: StreamBuilder<List<UserModel>>(
+                  stream: userStream(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: Text('No data Loaded...'),
+                      );
+                    } else if (snapshot.hasError) {
+                      return const Center(
+                        child: Text('An Error Occurred...'),
+                      );
+                    } else if (snapshot.hasData) {
+                      return ListView.builder(
+                          physics: const BouncingScrollPhysics(
+                            parent: AlwaysScrollableScrollPhysics(),
+                          ),
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            UserModel? userSnapshot = snapshot.data![index];
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0, horizontal: 16),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                child: ListTile(
+                                  title: Text('${userSnapshot.name}'),
+                                  subtitle: Text('${userSnapshot.email}'),
+                                  leading: const Icon(Icons.person),
+                                  trailing: const Icon(
+                                      Icons.arrow_forward_ios_rounded),
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            );
                           });
-                        },
-                        secondary: const Icon(Icons.person),
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 16),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      child: CheckboxListTile(
-                        title: const Text('Johnson Robertson'),
-                        subtitle: const Text('Nyegezi, Mwanza'),
-                        value: isSelected2,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            isSelected2 = value!;
-                          });
-                        },
-                        secondary: const Icon(Icons.person),
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 16),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      child: CheckboxListTile(
-                        title: const Text('Mussa Hezron'),
-                        subtitle: const Text('Dodoma, General Hospital'),
-                        value: isSelected,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            isSelected = value!;
-                          });
-                        },
-                        secondary: const Icon(Icons.person),
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ]),
+                    } else {
+                      return const Center(
+                        child: Text('An Error Occurred...'),
+                      );
+                    }
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(32.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.red),
+                    Expanded(
+                      child: TextField(
+                        controller: _messageController,
+                        decoration: const InputDecoration(
+                          hintText: 'Type message...',
+                          fillColor: Colors.white,
+                          filled: true,
+                          border: InputBorder.none,
                         ),
                       ),
                     ),
+                    const SizedBox(
+                      width: 20,
+                    ),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        setState(() {
+                          _messageController.clear();
+                        });
                       },
                       child: const Padding(
                         padding: EdgeInsets.all(16.0),
-                        child: Text('Done'),
+                        child: Text('send'),
                       ),
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),

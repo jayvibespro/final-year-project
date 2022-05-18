@@ -1,20 +1,55 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finalyearproject/models/single_chat_model.dart';
+import 'package:finalyearproject/services/single_chat_services.dart';
 import 'package:finalyearproject/view/pages/home_chat_page.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
 import 'package:finalyearproject/view/pages/posts/posts_page.dart';
-import 'package:finalyearproject/view/pages/user_chat/user_description_page.dart';
+import 'package:finalyearproject/view/pages/single_chat/user_description_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../profile/profile_page.dart';
 
-class UserChatPage extends StatefulWidget {
-  const UserChatPage({Key? key}) : super(key: key);
+class SingleChatMessagesPage extends StatefulWidget {
+  SingleChatMessagesPage({Key? key, required this.singleChatConversationModel})
+      : super(key: key);
+
+  SingleChatConversationModel? singleChatConversationModel;
 
   @override
-  State<UserChatPage> createState() => _UserChatPageState();
+  State<SingleChatMessagesPage> createState() => _SingleChatMessagesPageState();
 }
 
-class _UserChatPageState extends State<UserChatPage> {
+class _SingleChatMessagesPageState extends State<SingleChatMessagesPage> {
   bool isHover = false;
+
+  final TextEditingController _messageController = TextEditingController();
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  final _db = FirebaseFirestore.instance;
+
+  Stream<List<SingleChatMessagesModel>> singleChatMessagesStream() {
+    try {
+      return _db
+          .collection('single_chat')
+          .doc(widget.singleChatConversationModel?.id)
+          .collection('messages')
+          // .where('members', arrayContains: auth.currentUser?.uid)
+          .snapshots()
+          .map((element) {
+        final List<SingleChatMessagesModel> dataFromFireStore =
+            <SingleChatMessagesModel>[];
+        for (final DocumentSnapshot<Map<String, dynamic>> doc in element.docs) {
+          dataFromFireStore
+              .add(SingleChatMessagesModel.fromDocumentSnapshot(doc: doc));
+        }
+        return dataFromFireStore;
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -190,14 +225,15 @@ class _UserChatPageState extends State<UserChatPage> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
+                                children: [
                                   Text(
-                                    'Mussa Hezron',
-                                    style: TextStyle(fontSize: 20),
+                                    '${widget.singleChatConversationModel?.receiverName}',
+                                    style: const TextStyle(fontSize: 20),
                                   ),
                                   Text(
-                                    'mussahezron112@gmail.com',
-                                    style: TextStyle(color: Colors.black54),
+                                    '${widget.singleChatConversationModel?.receiverEmail}',
+                                    style:
+                                        const TextStyle(color: Colors.black54),
                                   ),
                                 ],
                               ),
@@ -210,7 +246,7 @@ class _UserChatPageState extends State<UserChatPage> {
                         IconButton(
                           onPressed: () {},
                           icon: const Icon(
-                            Icons.east_outlined,
+                            Icons.keyboard_arrow_right_outlined,
                             color: Colors.black54,
                           ),
                         ),
@@ -219,139 +255,96 @@ class _UserChatPageState extends State<UserChatPage> {
                   ),
                 ),
                 onTap: () {
+                  print('RECEIVER ID IS:');
+                  print(widget.singleChatConversationModel!.receiverId);
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const UserDescriptionPage()));
+                          builder: (context) => UserDescriptionPage(
+                                receiverId: widget
+                                    .singleChatConversationModel!.receiverId,
+                              )));
                 },
               ),
               Expanded(
-                child: ListView(children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 32),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
+                child: StreamBuilder<List<SingleChatMessagesModel>>(
+                  stream: singleChatMessagesStream(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: Text('No data Loaded...'),
+                      );
+                    } else if (snapshot.hasError) {
+                      return const Center(
+                        child: Text('An Error Occurred...'),
+                      );
+                    } else if (snapshot.hasData) {
+                      return ListView.builder(
+                          reverse: true,
+                          physics: const BouncingScrollPhysics(
+                            parent: AlwaysScrollableScrollPhysics(),
                           ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text(
-                                'This one will be a message received from the other user to the current logged in user.'),
-                          ),
-                        ),
-                      ),
-                      const Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 0, horizontal: 32),
-                        child: Text(
-                          '12:03 AM',
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 32),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF82E0AA),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text(
-                              'This one will be a message sent by the current user(me).',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 0, horizontal: 32),
-                        child: Text(
-                          '12:12 AM',
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 32),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text(
-                                'Welcome user to the current logged in user.'),
-                          ),
-                        ),
-                      ),
-                      const Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 0, horizontal: 32),
-                        child: Text(
-                          '12:24 AM',
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 32),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF82E0AA),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(16.0),
-                            child: Text(
-                              'This one will be a message sent by me. Thank you!.',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const Padding(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 0, horizontal: 32),
-                        child: Text(
-                          '12:33 AM',
-                          style: TextStyle(color: Colors.black54),
-                        ),
-                      ),
-                    ],
-                  ),
-                ]),
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            SingleChatMessagesModel? messageSnapshot =
+                                snapshot.data![index];
+                            return Column(
+                              crossAxisAlignment: messageSnapshot.senderId ==
+                                      auth.currentUser!.uid
+                                  ? CrossAxisAlignment.end
+                                  : CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 16, horizontal: 32),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: messageSnapshot.senderId ==
+                                              auth.currentUser!.uid
+                                          ? const Color(0xFF82E0AA)
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Text(
+                                        '${messageSnapshot.message}',
+                                        style: TextStyle(
+                                            color: messageSnapshot.senderId ==
+                                                    auth.currentUser!.uid
+                                                ? Colors.white
+                                                : Colors.black54),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 32),
+                                  child: Text(
+                                    '12:12 AM',
+                                    style: TextStyle(color: Colors.black54),
+                                  ),
+                                ),
+                              ],
+                            );
+                          });
+                    } else {
+                      return const Center(
+                        child: Text('An Error Occurred...'),
+                      );
+                    }
+                  },
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.all(32.0),
                 child: Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: TextField(
-                        decoration: InputDecoration(
+                        controller: _messageController,
+                        decoration: const InputDecoration(
                             hintText: 'Message...',
                             filled: true,
                             border: InputBorder.none,
@@ -362,7 +355,25 @@ class _UserChatPageState extends State<UserChatPage> {
                       width: 10,
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        SingleChatServices(
+                          id: widget.singleChatConversationModel?.id,
+                          message: _messageController.text,
+                          receiverImage:
+                              widget.singleChatConversationModel?.receiverImage,
+                          receiverEmail:
+                              widget.singleChatConversationModel?.receiverEmail,
+                          receiverName:
+                              widget.singleChatConversationModel?.receiverName,
+                          date: "12:33 PM",
+                          timeStamp: '',
+                          senderId: auth.currentUser!.uid,
+                        ).sendMessage();
+
+                        setState(() {
+                          _messageController.clear();
+                        });
+                      },
                       child: const Padding(
                         padding: EdgeInsets.all(16.0),
                         child: Text('send'),

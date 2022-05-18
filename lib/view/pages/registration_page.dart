@@ -270,9 +270,18 @@ class _RegistrationPageState extends State<RegistrationPage> {
                             accountType: account,
                           ).register();
 
-                          Get.snackbar(
+                          
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const PostsPage(title: 'Save the Future')),
+                          );
+
+Get.snackbar(
                               "Message", "User account successfully created.",
-                              snackPosition: SnackPosition.BOTTOM,
+                              snackPosition: SnackPosition.bottom,
                               borderRadius: 20,
                               duration: const Duration(
                                 seconds: 4,
@@ -281,13 +290,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                               isDismissible: true,
                               dismissDirection: DismissDirection.horizontal,
                               forwardAnimationCurve: Curves.easeInOutBack);
+                              
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const PostsPage(title: 'Save the Future')),
-                          );
                         },
                         child: const Padding(
                           padding: EdgeInsets.all(16.0),

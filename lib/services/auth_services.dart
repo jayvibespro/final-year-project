@@ -58,7 +58,7 @@ class AuthServices {
         'avatar_url': '',
       });
       Get.snackbar("Message", "User account successfully created.",
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.bottom,
           borderRadius: 20,
           duration: const Duration(
             seconds: 4,
@@ -71,7 +71,7 @@ class AuthServices {
       if (e.code == 'weak-password') {
         print('The password provided is too weak.');
         Get.snackbar("Message", "The password provided is too weak.",
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.bottom,
             borderRadius: 20,
             duration: const Duration(seconds: 4),
             margin: const EdgeInsets.all(15),
@@ -81,7 +81,7 @@ class AuthServices {
       } else if (e.code == 'email-already-in-use') {
         print('The account already exists for that email.');
         Get.snackbar("Message", "Account already exists.",
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.bottom,
             borderRadius: 20,
             duration: const Duration(seconds: 4),
             margin: const EdgeInsets.all(15),
@@ -92,7 +92,7 @@ class AuthServices {
     } catch (e) {
       print(e);
       Get.snackbar("Erro", "e",
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.bottom,
           borderRadius: 20,
           duration: const Duration(seconds: 4),
           margin: const EdgeInsets.all(15),
@@ -110,7 +110,7 @@ class AuthServices {
         password: password,
       );
       Get.snackbar("Message", "User login successfully.",
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.bottom,
           borderRadius: 20,
           duration: const Duration(seconds: 4),
           margin: const EdgeInsets.all(15),
@@ -121,7 +121,7 @@ class AuthServices {
       if (e.code == 'user-not-found') {
         print('No user found for that email.');
         Get.snackbar("Message", "No user found for that email.",
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.bottom,
             borderRadius: 20,
             duration: const Duration(seconds: 3),
             isDismissible: true,
@@ -130,7 +130,7 @@ class AuthServices {
       } else if (e.code == 'wrong-password') {
         print('Wrong password provided for that user.');
         Get.snackbar("Message", "Wrong password",
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.bottom,
             borderRadius: 20,
             duration: const Duration(seconds: 4),
             margin: const EdgeInsets.all(15),
@@ -145,7 +145,7 @@ class AuthServices {
     try {
       await FirebaseAuth.instance.signOut();
       Get.snackbar("Message", "User logout successfully.",
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.bottom,
           borderRadius: 20,
           duration: const Duration(seconds: 4),
           margin: const EdgeInsets.all(15),
@@ -156,7 +156,7 @@ class AuthServices {
       if (e.code == 'user-not-found') {
         print('No user found for that email.');
         Get.snackbar("Message", "No user found for that email.",
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.bottom,
             borderRadius: 20,
             duration: const Duration(seconds: 3),
             isDismissible: true,
@@ -165,7 +165,7 @@ class AuthServices {
       } else if (e.code == 'wrong-password') {
         print('Wrong password provided for that user.');
         Get.snackbar("Message", "Wrong password",
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.bottom,
             borderRadius: 20,
             duration: const Duration(seconds: 4),
             margin: const EdgeInsets.all(15),
@@ -194,7 +194,7 @@ class AuthServices {
         'avatar_url': avatarUrl,
       });
       Get.snackbar("Message", "User account successfully created.",
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.bottom,
           borderRadius: 20,
           duration: const Duration(
             seconds: 4,
@@ -207,7 +207,7 @@ class AuthServices {
       if (e.code == 'weak-password') {
         print('The password provided is too weak.');
         Get.snackbar("Message", "The password provided is too weak.",
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.bottom,
             borderRadius: 20,
             duration: const Duration(seconds: 4),
             margin: const EdgeInsets.all(15),
@@ -217,7 +217,7 @@ class AuthServices {
       } else if (e.code == 'email-already-in-use') {
         print('The account already exists for that email.');
         Get.snackbar("Message", "Account already exists.",
-            snackPosition: SnackPosition.BOTTOM,
+            snackPosition: SnackPosition.bottom,
             borderRadius: 20,
             duration: const Duration(seconds: 4),
             margin: const EdgeInsets.all(15),
@@ -228,7 +228,7 @@ class AuthServices {
     } catch (e) {
       print(e);
       Get.snackbar("Erro", "e",
-          snackPosition: SnackPosition.BOTTOM,
+          snackPosition: SnackPosition.bottom,
           borderRadius: 20,
           duration: const Duration(seconds: 4),
           margin: const EdgeInsets.all(15),

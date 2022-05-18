@@ -1,9 +1,12 @@
+import 'package:finalyearproject/view/pages/home_chat_page.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(
       options: const FirebaseOptions(
           apiKey: "AIzaSyBA4PeG_wx91FJzVqgRe8zeApYgYzfgn3c",
@@ -20,16 +23,32 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Save the future',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      theme: ThemeData(),
+      home: const MainPage(),
+    );
+  }
+}
+
+class MainPage extends StatelessWidget {
+  const MainPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ChatPage();
+          } else {
+            return LoginPage();
+          }
+        },
       ),
-      home: LoginPage(),
     );
   }
 }

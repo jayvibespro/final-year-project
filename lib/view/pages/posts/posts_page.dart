@@ -1,10 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finalyearproject/models/posts_model.dart';
+import 'package:finalyearproject/services/auth_services.dart';
 import 'package:finalyearproject/services/post_service.dart';
 import 'package:finalyearproject/view/pages/home_chat_page.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
-import 'package:finalyearproject/widgets/post_container.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
 import '../profile/profile_page.dart';
+import 'comments_page.dart';
 
 class PostsPage extends StatefulWidget {
   const PostsPage({Key? key, required this.title}) : super(key: key);
@@ -17,8 +20,30 @@ class PostsPage extends StatefulWidget {
 
 class _PostsPageState extends State<PostsPage> {
   bool isHover = false;
+  bool isLiked = false;
 
   final TextEditingController _postController = TextEditingController();
+  final _db = FirebaseFirestore.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  Stream<List<PostsModel>> postStream() {
+    try {
+      return _db
+          .collection("posts")
+          // .orderBy('timestamp', descending: true)
+          .snapshots()
+          .map((element) {
+        final List<PostsModel> dataFromFireStore = <PostsModel>[];
+        for (final DocumentSnapshot<Map<String, dynamic>> doc in element.docs) {
+          dataFromFireStore.add(PostsModel.fromDocumentSnapshot(doc: doc));
+        }
+
+        return dataFromFireStore;
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,6 +170,7 @@ class _PostsPageState extends State<PostsPage> {
               PopupMenuItem(
                 child: GestureDetector(
                     onTap: () {
+                      AuthServices(email: '', password: '').logout();
                       Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(builder: (context) => LoginPage()),
@@ -167,23 +193,162 @@ class _PostsPageState extends State<PostsPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
+              const Padding(
+                padding: EdgeInsets.all(32.0),
+                child: Text(
+                  'Posts',
+                  style: TextStyle(fontSize: 40),
+                ),
+              ),
+              const Divider(),
               Expanded(
-                child: ListView(
-                  children: const [
-                    Padding(
-                      padding: EdgeInsets.all(32.0),
-                      child: Center(
-                        child: Text(
-                          "Recent Posts",
-                          style: TextStyle(fontSize: 40),
-                        ),
-                      ),
-                    ),
-                    PostContainer(),
-                    PostContainer(),
-                    PostContainer(),
-                    PostContainer(),
-                  ],
+                child: StreamBuilder<List<PostsModel>>(
+                  stream: postStream(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (snapshot.hasError) {
+                      return const Center(
+                        child: Text('An Error Occurred...'),
+                      );
+                    } else if (snapshot.hasData) {
+                      return ListView.builder(
+                          physics: const BouncingScrollPhysics(
+                            parent: AlwaysScrollableScrollPhysics(),
+                          ),
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            PostsModel postSnapshot = snapshot.data![index];
+
+                            return InkWell(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 32, vertical: 16),
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: const Color(0xFFF7F9F9),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  '${postSnapshot.likes}',
+                                                  style: const TextStyle(
+                                                      fontSize: 26,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                const SizedBox(
+                                                  width: 20,
+                                                ),
+                                                IconButton(
+                                                  onPressed: () async {
+                                                    var childDoc =
+                                                        await FirebaseFirestore
+                                                            .instance
+                                                            .collection('posts')
+                                                            .doc(postSnapshot
+                                                                .id);
+
+                                                    FirebaseFirestore.instance
+                                                        .runTransaction(
+                                                            (transaction) async {
+                                                      final snapshot =
+                                                          await transaction
+                                                              .get(childDoc);
+
+                                                      final newLike = snapshot
+                                                              .get("likes") +
+                                                          1;
+
+                                                      transaction.update(
+                                                          childDoc,
+                                                          {"likes": newLike});
+                                                    }).then(
+                                                      (value) => print(
+                                                          "DocumentSnapshot successfully updated!"),
+                                                      onError: (e) => print(
+                                                          "Error updating document $e"),
+                                                    );
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.thumb_up,
+                                                    color: isLiked
+                                                        ? Colors.black54
+                                                        : Colors.green[300],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Text('${postSnapshot.ownerName}'),
+                                            const Text('Dodoma Center'),
+                                            const Icon(Icons.person)
+                                          ],
+                                        ),
+                                      ),
+                                      const Padding(
+                                        padding: EdgeInsets.only(bottom: 16),
+                                        child: Divider(),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            16, 0, 16, 16),
+                                        child: Text("${postSnapshot.post}"),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(16.0),
+                                            child: Center(
+                                              child:
+                                                  Text("${postSnapshot.date}"),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(16.0),
+                                            child: Center(
+                                              child: Text(
+                                                  "Comments: ${postSnapshot.commentCount}"),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => CommentsPage(
+                                            postsModel: postSnapshot,
+                                          )),
+                                );
+                              },
+                            );
+                          });
+                    } else {
+                      return const Center(
+                        child: Text('An Error Occurred...'),
+                      );
+                    }
+                  },
                 ),
               ),
               Padding(
@@ -278,10 +443,15 @@ class _PostsPageState extends State<PostsPage> {
                       ElevatedButton(
                         onPressed: () {
                           PostService(
-                                  post: _postController.text,
-                                  date: '12/07/2022',
-                                  likes: '0')
-                              .addPost();
+                            post: _postController.text,
+                            date: '12/07/2022',
+                            likes: 0,
+                            commentCount: 0,
+                          ).addPost();
+
+                          setState(() {
+                            _postController.clear();
+                          });
 
                           Navigator.pop(context);
                         },

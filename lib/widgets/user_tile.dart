@@ -1,4 +1,3 @@
-import 'package:finalyearproject/view/pages/user_chat/user_chat_page.dart';
 import 'package:flutter/material.dart';
 
 class UserTile extends StatelessWidget {
@@ -67,12 +66,7 @@ class UserTile extends StatelessWidget {
           ),
         ),
       ),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const UserChatPage()),
-        );
-      },
+      onTap: () {},
     );
   }
 }

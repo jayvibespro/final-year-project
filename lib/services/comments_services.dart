@@ -1,30 +1,44 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CommentService {
-  String comment;
-  String id;
-  String likes;
-  String ownerName;
-  String ownerId;
-  String date;
+  int? commentCount;
+  String? comment;
+  String? postId;
+  String? id;
+  String? ownerName;
+  String? ownerId;
+  String? date;
 
   CommentService({
-    required this.comment,
-    required this.id,
-    required this.likes,
-    required this.ownerName,
-    required this.ownerId,
-    required this.date,
+    this.commentCount,
+    this.comment,
+    this.postId,
+    this.id,
+    this.ownerName,
+    this.ownerId,
+    this.date,
   });
 
   addComment() async {
-    var addNewComment =
-        await FirebaseFirestore.instance.collection('posts').add({
-      'post': comment,
-      'likes': likes,
-      'owner_id': ownerId,
-      'owner_name': ownerName,
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+
+    var addNewComment = await FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId)
+        .collection('comments')
+        .add({
+      'comment': comment,
+      'owner_id': _auth.currentUser?.uid,
+      'owner_name': _auth.currentUser?.email,
       'date': date,
+    });
+
+    var commentAdder = await FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId)
+        .update({
+      'comment_count': commentCount,
     });
   }
 }

@@ -1,6 +1,7 @@
 import 'package:finalyearproject/services/auth_services.dart';
 import 'package:finalyearproject/view/pages/posts/posts_page.dart';
 import 'package:finalyearproject/view/pages/registration_page.dart';
+import 'package:flash/flash.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
@@ -10,14 +11,46 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool isHover = false;
+  bool isLoading = false;
   bool isVisible = false;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  void _showBasicsFlash({
+    Duration? duration,
+    flashStyle = FlashBehavior.floating,
+  }) {
+    showFlash(
+      context: context,
+      duration: duration,
+      builder: (context, controller) {
+        return Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Flash(
+            controller: controller,
+            behavior: flashStyle,
+            position: FlashPosition.bottom,
+            boxShadows: kElevationToShadow[1],
+            borderRadius: BorderRadius.circular(12),
+            backgroundColor: Colors.grey[50],
+            margin: const EdgeInsets.symmetric(horizontal: 310),
+            horizontalDismissDirection: HorizontalDismissDirection.horizontal,
+            child: FlashBar(
+              content: const Center(child: Text('Welcome back user!')),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         elevation: 0,
         title: Row(
@@ -183,11 +216,22 @@ class _LoginPageState extends State<LoginPage> {
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          setState(() {
+                            isLoading = true;
+                          });
                           AuthServices(
                                   email: _emailController.text,
                                   password: _passwordController.text)
                               .login();
+                          await Future.delayed(const Duration(seconds: 2));
+
+                          setState(() {
+                            isLoading = false;
+                          });
+
+                          _showBasicsFlash(
+                              duration: const Duration(seconds: 3));
 
                           Navigator.push(
                             context,
@@ -195,10 +239,21 @@ class _LoginPageState extends State<LoginPage> {
                                 builder: (context) =>
                                     const PostsPage(title: 'Save the Future')),
                           );
+
+                          _showBasicsFlash(
+                              duration: const Duration(seconds: 3));
                         },
-                        child: const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text('Sign in'),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: isLoading
+                              ? Container(
+                                  width: 16,
+                                  height: 16,
+                                  child: const CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 4,
+                                  ))
+                              : const Text('Sign in'),
                         ),
                       ),
                     ),
