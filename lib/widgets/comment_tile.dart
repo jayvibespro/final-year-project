@@ -67,7 +67,7 @@ class CommentTile extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => UserDescriptionPage()),
+          MaterialPageRoute(builder: (context) => ChatUserDescriptionPage()),
         );
       },
     );

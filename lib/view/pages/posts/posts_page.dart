@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:finalyearproject/models/posts_model.dart';
 import 'package:finalyearproject/services/auth_services.dart';
+import 'package:finalyearproject/services/like_services.dart';
 import 'package:finalyearproject/services/post_service.dart';
 import 'package:finalyearproject/view/pages/home_chat_page.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
 import '../profile/profile_page.dart';
 import 'comments_page.dart';
 
@@ -20,7 +22,7 @@ class PostsPage extends StatefulWidget {
 
 class _PostsPageState extends State<PostsPage> {
   bool isHover = false;
-  bool isLiked = false;
+  bool isLike = false;
 
   final TextEditingController _postController = TextEditingController();
   final _db = FirebaseFirestore.instance;
@@ -36,6 +38,22 @@ class _PostsPageState extends State<PostsPage> {
         final List<PostsModel> dataFromFireStore = <PostsModel>[];
         for (final DocumentSnapshot<Map<String, dynamic>> doc in element.docs) {
           dataFromFireStore.add(PostsModel.fromDocumentSnapshot(doc: doc));
+
+          _db
+              .collection('posts')
+              .doc(PostsModel.fromDocumentSnapshot(doc: doc).id)
+              .collection('likers')
+              .where('user_id', isEqualTo: auth.currentUser?.uid)
+              .get()
+              .then((value) {
+            value.docs.forEach((element) {
+              if (element['value'] == true) {
+                isLike = element['value'];
+              } else {
+                isLike = false;
+              }
+            });
+          });
         }
 
         return dataFromFireStore;
@@ -256,39 +274,23 @@ class _PostsPageState extends State<PostsPage> {
                                                 ),
                                                 IconButton(
                                                   onPressed: () async {
-                                                    var childDoc =
-                                                        await FirebaseFirestore
-                                                            .instance
-                                                            .collection('posts')
-                                                            .doc(postSnapshot
-                                                                .id);
-
-                                                    FirebaseFirestore.instance
-                                                        .runTransaction(
-                                                            (transaction) async {
-                                                      final snapshot =
-                                                          await transaction
-                                                              .get(childDoc);
-
-                                                      final newLike = snapshot
-                                                              .get("likes") +
-                                                          1;
-
-                                                      transaction.update(
-                                                          childDoc,
-                                                          {"likes": newLike});
-                                                    }).then(
-                                                      (value) => print(
-                                                          "DocumentSnapshot successfully updated!"),
-                                                      onError: (e) => print(
-                                                          "Error updating document $e"),
-                                                    );
+                                                    setState(() {
+                                                      isLike = !isLike;
+                                                    });
+                                                    LikeServices(
+                                                            id: postSnapshot.id,
+                                                            like: postSnapshot
+                                                                .likes,
+                                                            userId: auth
+                                                                .currentUser!
+                                                                .uid)
+                                                        .addLike();
                                                   },
                                                   icon: Icon(
-                                                    Icons.thumb_up,
-                                                    color: isLiked
-                                                        ? Colors.black54
-                                                        : Colors.green[300],
+                                                    isLike
+                                                        ? Icons.favorite
+                                                        : Icons.favorite_border,
+                                                    color: Colors.red,
                                                   ),
                                                 ),
                                               ],

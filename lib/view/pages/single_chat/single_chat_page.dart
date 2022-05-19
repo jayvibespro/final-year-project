@@ -257,7 +257,7 @@ class _SingleChatMessagesPageState extends State<SingleChatMessagesPage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => UserDescriptionPage(
+                          builder: (context) => ChatUserDescriptionPage(
                                 receiverId: widget
                                     .singleChatConversationModel!.receiverId,
                               )));

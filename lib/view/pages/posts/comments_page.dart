@@ -5,6 +5,7 @@ import 'package:finalyearproject/services/auth_services.dart';
 import 'package:finalyearproject/view/pages/home_chat_page.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
 import 'package:finalyearproject/view/pages/posts/posts_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../services/comments_services.dart';
@@ -22,7 +23,7 @@ class CommentsPage extends StatefulWidget {
 
 class _CommentsPageState extends State<CommentsPage> {
   bool isHover = false;
-
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _commentController = TextEditingController();
   final _db = FirebaseFirestore.instance;
 
@@ -303,12 +304,24 @@ class _CommentsPageState extends State<CommentsPage> {
                                 ),
                               ),
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => UserDescriptionPage(
-                                          commentsModel: commentSnapshot)),
-                                );
+                                if (commentSnapshot.ownerId ==
+                                    _auth.currentUser?.uid) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const ProfilePage()),
+                                  );
+                                } else {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            CommentUserDescriptionPage(
+                                                commentsModel:
+                                                    commentSnapshot)),
+                                  );
+                                }
                               },
                             );
                           });

@@ -124,27 +124,34 @@ class _ChatPageState extends State<ChatPage> {
                   return Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: 8.0, horizontal: 16),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      child: ListTile(
-                        title: Text('${userConversationSnapshot.receiverName}'),
-                        subtitle:
-                            Text('${userConversationSnapshot.lastMessage}'),
-                        leading: const Icon(Icons.person),
-                        trailing: Text('${userConversationSnapshot.lastDate}'),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SingleChatMessagesPage(
-                                        singleChatConversationModel:
-                                            userConversationSnapshot,
-                                      )));
-                        },
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[50],
-                        borderRadius: BorderRadius.circular(12),
+                    child: Material(
+                      elevation: 1,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        child: ListTile(
+                          title:
+                              Text('${userConversationSnapshot.receiverName}'),
+                          subtitle:
+                              Text('${userConversationSnapshot.lastMessage}'),
+                          leading: const Icon(Icons.person),
+                          trailing:
+                              Text('${userConversationSnapshot.lastDate}'),
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        SingleChatMessagesPage(
+                                          singleChatConversationModel:
+                                              userConversationSnapshot,
+                                        )));
+                          },
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   );
@@ -180,27 +187,31 @@ class _ChatPageState extends State<ChatPage> {
                   return Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: 8.0, horizontal: 16),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      child: ListTile(
-                        title: Text('${groupConversationSnapshot.groupName}'),
-                        subtitle:
-                            Text('${groupConversationSnapshot.lastMessage}'),
-                        leading: const Icon(Icons.group),
-                        trailing: Text('${groupConversationSnapshot.lastDate}'),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => GroupChatPage(
-                                        groupChatConversationModel:
-                                            groupConversationSnapshot,
-                                      )));
-                        },
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[50],
-                        borderRadius: BorderRadius.circular(12),
+                    child: Material(
+                      elevation: 1,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        child: ListTile(
+                          title: Text('${groupConversationSnapshot.groupName}'),
+                          subtitle:
+                              Text('${groupConversationSnapshot.lastMessage}'),
+                          leading: const Icon(Icons.group),
+                          trailing: Text('${groupConversationSnapshot.lastDate}'),
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => GroupChatPage(
+                                          groupChatConversationModel:
+                                              groupConversationSnapshot,
+                                        )));
+                          },
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   );
@@ -286,26 +297,30 @@ class _ChatPageState extends State<ChatPage> {
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 8.0, horizontal: 16),
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              child: ListTile(
-                                title: Text('${userSnapshot.name}'),
-                                subtitle: Text('${userSnapshot.email}'),
-                                leading: const Icon(Icons.person),
-                                trailing:
-                                    const Icon(Icons.arrow_forward_ios_rounded),
-                                onTap: () {
-                                  setState(() {
-                                    receiverEmail = userSnapshot.email;
-                                    receiverName = userSnapshot.name;
-                                    receiverImage = userSnapshot.avatarUrl;
-                                    receiverId = userSnapshot.userId;
-                                  });
-                                },
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12),
+                            child: Material(
+                              elevation: 1,
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                child: ListTile(
+                                  title: Text('${userSnapshot.name}'),
+                                  subtitle: Text('${userSnapshot.email}'),
+                                  leading: const Icon(Icons.person),
+                                  trailing:
+                                      const Icon(Icons.arrow_forward_ios_rounded),
+                                  onTap: () {
+                                    setState(() {
+                                      receiverEmail = userSnapshot.email;
+                                      receiverName = userSnapshot.name;
+                                      receiverImage = userSnapshot.avatarUrl;
+                                      receiverId = userSnapshot.userId;
+                                    });
+                                  },
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
                             ),
                           );
@@ -337,11 +352,36 @@ class _ChatPageState extends State<ChatPage> {
                     width: 20,
                   ),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      String? tempId = '';
                       setState(() {
                         singleChatMembers = [auth.currentUser!.uid, receiverId];
                       });
-                      SingleChatServices(
+
+var getChat = await FirebaseFirestore.instance.collection('single_chat').where('members', arrayContains: auth.currentUser!.uid ).get().then((value){
+  value.docs.forEach((element) {
+    if(element.data()['members'].contains(receiverId)){
+      tempId = element.id;
+    }
+   });
+});
+
+print('receiver ID id $tempId');
+
+                      if(tempId != ''){
+                        SingleChatServices(
+                          id: tempId,
+                           message: _singleChatMessageController.text,
+                           
+                              receiverName: receiverName,
+                              receiverEmail: receiverEmail,
+                              receiverImage: receiverImage,
+                              date: 'May 17, 02:33',
+                              senderId: auth.currentUser!.uid,
+                        
+                        ).sendMessage();
+                      }else{
+                        SingleChatServices(
                               members: singleChatMembers,
                               receiverId: receiverId,
                               receiverName: receiverName,
@@ -349,8 +389,10 @@ class _ChatPageState extends State<ChatPage> {
                               receiverImage: receiverImage,
                               senderId: auth.currentUser!.uid,
                               message: _singleChatMessageController.text,
-                              date: 'May 17, 02:33')
+                              date: 'May 17, 02:33',)
                           .createChat();
+                      }
+
                       setState(() {
                         _singleChatMessageController.clear();
                         isChosenWidget = 0;
@@ -719,192 +761,257 @@ class _ChatPageState extends State<ChatPage> {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width * 0.25,
-                        child: isChosenWidget == 2 || isChosenWidget == 3
-                            ? null
-                            : Row(
-                                children: [
-                                  Expanded(
-                                    child: TextField(
-                                      controller: _searchController,
-                                      decoration: InputDecoration(
-                                        fillColor: Colors.white,
-                                        filled: true,
-                                        hintText: searchTitle(),
-                                        suffixIcon: InkWell(
-                                          onTap: () {
-                                            setState(() {
-                                              _searchController.clear();
-                                            });
-                                          },
-                                          child: Icon(
-                                            Icons.close,
-                                            color: Colors.grey[300],
+                      Material(
+                        elevation: 2,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.25,
+                            child: isChosenWidget == 2 || isChosenWidget == 3
+                                ? null
+                                : Row(
+                                    children: [
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _searchController,
+                                          decoration: InputDecoration(
+                                            fillColor: Colors.white,
+                                            filled: true,
+                                            hintText: searchTitle(),
+                                            suffixIcon: InkWell(
+                                              onTap: () {
+                                                setState(() {
+                                                  _searchController.clear();
+                                                });
+                                              },
+                                              child: Icon(
+                                                Icons.close,
+                                                color: Colors.grey[300],
+                                              ),
+                                            ),
+                                            enabledBorder: const OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10.0)),
+                                              borderSide: BorderSide(
+                                                color: Colors.transparent,
+                                              ),
+                                            ),
+                                            focusedBorder: const OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(10.0)),
+                                              borderSide: BorderSide(
+                                                  color: Colors.transparent),
+                                            ),
                                           ),
                                         ),
-                                        enabledBorder: const OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10.0)),
-                                          borderSide: BorderSide(
-                                            color: Colors.transparent,
+                                      ),
+                                      const SizedBox(
+                                        width: 20,
+                                      ),
+                                      CircleAvatar(
+                                        radius: 26,
+                                        backgroundColor: Colors.white,
+                                        child: IconButton(
+                                          color: Colors.white,
+                                          onPressed: () {},
+                                          icon: const Icon(
+                                            Icons.search,
+                                            color: Colors.black54,
                                           ),
                                         ),
-                                        focusedBorder: const OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(10.0)),
-                                          borderSide: BorderSide(
-                                              color: Colors.transparent),
+                                      ),
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(10),
                                         ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                  const SizedBox(
-                                    width: 20,
-                                  ),
-                                  CircleAvatar(
-                                    radius: 26,
-                                    backgroundColor: Colors.white,
-                                    child: IconButton(
-                                      color: Colors.white,
-                                      onPressed: () {},
-                                      icon: const Icon(
-                                        Icons.search,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                  ),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                          ),
+                        ),
                       ),
                       const SizedBox(
                         height: 20,
                       ),
-                      InkWell(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.25,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: isChosenWidget == 0
-                                  ? const Color(0xFFD1F2EB)
-                                  : Colors.white,
-                            ),
-                            child: Center(
-                              child: Text(
-                                'Chats',
-                                style: TextStyle(
-                                    color: isChosenWidget == 0
-                                        ? Colors.white
-                                        : Colors.black54,
-                                    fontSize: isChosenWidget == 0 ? 20 : 16),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              isChosenWidget = 0;
+                            });
+                          },
+                          child: Material(
+                            elevation: 2,
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.25,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: isChosenWidget == 0
+                                    ? const Color(0xFFD1F2EB)
+                                    : Colors.white,
+                              ),
+                              child: Center(
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                   const Padding(
+                                      padding:  EdgeInsets.only(left: 84, right: 32),
+                                      child:  Icon(Icons.person, color: Colors.black54),
+                                    ),
+                                    Text(
+                                      'Chats',
+                                      style: TextStyle(
+                                          color: isChosenWidget == 0
+                                              ? Colors.white
+                                              : Colors.black54,
+                                          fontSize: isChosenWidget == 0 ? 20 : 16),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                        onTap: () {
-                          setState(() {
-                            isChosenWidget = 0;
-                          });
-                        },
                       ),
-                      InkWell(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.25,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: isChosenWidget == 1
-                                  ? const Color(0xFFD1F2EB)
-                                  : Colors.white,
-                            ),
-                            child: Center(
-                              child: Text(
-                                'Groups',
-                                style: TextStyle(
-                                    color: isChosenWidget == 1
-                                        ? Colors.white
-                                        : Colors.black54,
-                                    fontSize: isChosenWidget == 1 ? 20 : 16),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              isChosenWidget = 1;
+                            });
+                          },
+                          child: Material(
+                            elevation: 2,
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.25,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: isChosenWidget == 1
+                                    ? const Color(0xFFD1F2EB)
+                                    : Colors.white,
+                              ),
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                  const Padding(
+                                     padding:  EdgeInsets.only(left: 84,right: 32.0),
+                                     child:  Icon(Icons.group, color: Colors.black54,),
+                                   ),
+                                    Text(
+                                      'Groups',
+                                      style: TextStyle(
+                                          color: isChosenWidget == 1
+                                              ? Colors.white
+                                              : Colors.black54,
+                                          fontSize: isChosenWidget == 1 ? 20 : 16),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                        onTap: () {
-                          setState(() {
-                            isChosenWidget = 1;
-                          });
-                        },
                       ),
-                      InkWell(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.25,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: isChosenWidget == 2
-                                  ? const Color(0xFFD1F2EB)
-                                  : Colors.white,
-                            ),
-                            child: Center(
-                              child: Text(
-                                'Start Chat',
-                                style: TextStyle(
-                                    color: isChosenWidget == 2
-                                        ? Colors.white
-                                        : Colors.black54,
-                                    fontSize: isChosenWidget == 2 ? 20 : 16),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              isChosenWidget = 2;
+                            });
+                          },
+                          child: Material(
+                            elevation: 2,
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.25,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: isChosenWidget == 2
+                                    ? const Color(0xFFD1F2EB)
+                                    : Colors.white,
+                              ),
+                              child: Center(
+                                child: Row(
+                                  
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                   const Padding(
+                                      padding:  EdgeInsets.only(left: 84, right:32.0),
+                                      child: Icon(Icons.add_comment, color: Colors.black54),
+                                    ),
+                                    Text(
+                                      'Start Chat',
+                                      style: TextStyle(
+                                          color: isChosenWidget == 2
+                                              ? Colors.white
+                                              : Colors.black54,
+                                          fontSize: isChosenWidget == 2 ? 20 : 16),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                        onTap: () {
-                          setState(() {
-                            isChosenWidget = 2;
-                          });
-                        },
                       ),
-                      InkWell(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.25,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: isChosenWidget == 3
-                                  ? const Color(0xFFD1F2EB)
-                                  : Colors.white,
-                            ),
-                            child: Center(
-                              child: Text(
-                                'Create group',
-                                style: TextStyle(
-                                    color: isChosenWidget == 3
-                                        ? Colors.white
-                                        : Colors.black54,
-                                    fontSize: isChosenWidget == 3 ? 20 : 16),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              isChosenWidget = 3;
+                            });
+                          },
+                          child: Material(
+                            elevation:2,
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.25,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: isChosenWidget == 3
+                                    ? const Color(0xFFD1F2EB)
+                                    : Colors.white,
+                              ),
+                              child: Center(
+                                child: Row(
+                                  
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+const Padding(
+  padding: EdgeInsets.only(left: 84, right:32.0),
+  child:   Icon(Icons.group_add, color: Colors.black54,),
+),
+                                    Text(
+                                      'Create group',
+                                      style: TextStyle(
+                                          color: isChosenWidget == 3
+                                              ? Colors.white
+                                              : Colors.black54,
+                                          fontSize: isChosenWidget == 3 ? 20 : 16),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                        onTap: () {
-                          setState(() {
-                            isChosenWidget = 3;
-                          });
-                        },
                       ),
                     ],
                   ),

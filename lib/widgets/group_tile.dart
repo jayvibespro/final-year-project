@@ -1,4 +1,3 @@
-import 'package:finalyearproject/view/pages/group_chat/group_chat_page.dart';
 import 'package:flutter/material.dart';
 
 class GroupTile extends StatelessWidget {
@@ -67,10 +66,10 @@ class GroupTile extends StatelessWidget {
         ),
       ),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const GroupChatPage()),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) =>  GroupChatPage()),
+        // );
       },
     );
   }

@@ -31,6 +31,14 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
   List<String> groupMembersIds = [];
   List<MembersSelected> selectedMembers = [];
 
+  isSelected() {
+    if (selectedMembers == []) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   final TextEditingController _searchController = TextEditingController();
 
   final FirebaseAuth auth = FirebaseAuth.instance;
@@ -225,39 +233,45 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
                     return Padding(
                       padding: const EdgeInsets.symmetric(
                           vertical: 8.0, horizontal: 16),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        child: CheckboxListTile(
-                          title: Text('${widget.members[index].memberName}'),
-                          subtitle:
-                              Text('${widget.members[index].memberEmail}'),
-                          value: widget.members[index].memberValue,
-                          onChanged: (bool? value) {
-                            setState(() {
-                              widget.members[index].memberValue = value!;
-                            });
-                            groupMembersIds.add(widget.members[index].memberId);
-                            if (widget.members[index].memberValue == true) {
-                              selectedMembers.add(MembersSelected(
-                                memberId: widget.members[index].memberId,
-                                memberImage: widget.members[index].memberImage,
-                              ));
-                            } else if (widget.members[index].memberValue ==
-                                false) {
+                      child: Material(
+                        elevation: 1,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          child: CheckboxListTile(
+                            title: Text('${widget.members[index].memberName}'),
+                            subtitle:
+                                Text('${widget.members[index].memberEmail}'),
+                            value: widget.members[index].memberValue,
+                            onChanged: (bool? value) {
                               setState(() {
-                                selectedMembers.removeWhere((element) =>
-                                    element.memberId ==
-                                    widget.members[index].memberId);
-                                groupMembersIds
-                                    .remove(widget.members[index].memberId);
+                                widget.members[index].memberValue = value!;
                               });
-                            }
-                          },
-                          secondary: const Icon(Icons.person),
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
+                              groupMembersIds
+                                  .add(widget.members[index].memberId);
+                              if (widget.members[index].memberValue == true) {
+                                selectedMembers.add(MembersSelected(
+                                  memberId: widget.members[index].memberId,
+                                  memberImage:
+                                      widget.members[index].memberImage,
+                                ));
+                              } else if (widget.members[index].memberValue ==
+                                  false) {
+                                setState(() {
+                                  selectedMembers.removeWhere((element) =>
+                                      element.memberId ==
+                                      widget.members[index].memberId);
+                                  groupMembersIds
+                                      .remove(widget.members[index].memberId);
+                                });
+                              }
+                            },
+                            secondary: const Icon(Icons.person),
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     );
@@ -360,8 +374,7 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
 
                         Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => LoginPage()),
+                            MaterialPageRoute(builder: (context) => ChatPage()),
                             (route) => false);
                       },
                       child: const Padding(
