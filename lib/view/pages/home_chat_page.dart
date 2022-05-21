@@ -19,6 +19,7 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  String? groupSearchString;
   String receiverName = "Receiver's name";
   String receiverId = '';
   String receiverImage = '';
@@ -27,19 +28,29 @@ class _ChatPageState extends State<ChatPage> {
 
   bool isHover = false;
   int isChosenWidget = 0;
-  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _groupSearchController = TextEditingController();
   final TextEditingController _groupNameController = TextEditingController();
   final TextEditingController _groupDescriptionController =
       TextEditingController();
   final TextEditingController _userSearchController = TextEditingController();
   final TextEditingController _singleChatMessageController =
       TextEditingController();
-  final TextEditingController _groupChatMessageController =
-      TextEditingController();
 
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   final _db = FirebaseFirestore.instance;
+
+  List<String> searchIndexList = [];
+
+  createSearchIndex(String name) {
+    List<String> splitList = name.split(' ');
+
+    for (int i = 0; i < splitList.length; i++) {
+      for (int j = 0; j < splitList[i].length + i; j++) {
+        searchIndexList.add(splitList[i].substring(0, j + 1).toLowerCase());
+      }
+    }
+  }
 
   Stream<List<UserModel>> userStream() {
     try {
@@ -80,22 +91,46 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Stream<List<GroupChatConversationModel>> groupChatConversationStream() {
-    try {
-      return _db
-          .collection('group_chat')
-          .where('members', arrayContains: auth.currentUser?.uid)
-          .snapshots()
-          .map((element) {
-        final List<GroupChatConversationModel> dataFromFireStore =
-            <GroupChatConversationModel>[];
-        for (final DocumentSnapshot<Map<String, dynamic>> doc in element.docs) {
-          dataFromFireStore
-              .add(GroupChatConversationModel.fromDocumentSnapshot(doc: doc));
-        }
-        return dataFromFireStore;
-      });
-    } catch (e) {
-      rethrow;
+    if (groupSearchString == null || groupSearchString == '') {
+      try {
+        return _db
+            .collection('group_chat')
+            .where('members', arrayContains: auth.currentUser?.uid)
+            .snapshots()
+            .map((element) {
+          final List<GroupChatConversationModel> dataFromFireStore =
+              <GroupChatConversationModel>[];
+          for (final DocumentSnapshot<Map<String, dynamic>> doc
+              in element.docs) {
+            dataFromFireStore
+                .add(GroupChatConversationModel.fromDocumentSnapshot(doc: doc));
+          }
+          return dataFromFireStore;
+        });
+      } catch (e) {
+        rethrow;
+      }
+    } else {
+      try {
+        return _db
+            .collection('group_chat')
+            .where('members', arrayContains: auth.currentUser?.uid)
+            .snapshots()
+            .map((element) {
+          final List<GroupChatConversationModel> dataFromFireStore =
+              <GroupChatConversationModel>[];
+          for (final DocumentSnapshot<Map<String, dynamic>> doc
+              in element.docs) {
+            if (doc.data()!['search_index'].contains(groupSearchString)) {
+              dataFromFireStore.add(
+                  GroupChatConversationModel.fromDocumentSnapshot(doc: doc));
+            }
+          }
+          return dataFromFireStore;
+        });
+      } catch (e) {
+        rethrow;
+      }
     }
   }
 
@@ -197,7 +232,8 @@ class _ChatPageState extends State<ChatPage> {
                           subtitle:
                               Text('${groupConversationSnapshot.lastMessage}'),
                           leading: const Icon(Icons.group),
-                          trailing: Text('${groupConversationSnapshot.lastDate}'),
+                          trailing:
+                              Text('${groupConversationSnapshot.lastDate}'),
                           onTap: () {
                             Navigator.push(
                                 context,
@@ -306,8 +342,8 @@ class _ChatPageState extends State<ChatPage> {
                                   title: Text('${userSnapshot.name}'),
                                   subtitle: Text('${userSnapshot.email}'),
                                   leading: const Icon(Icons.person),
-                                  trailing:
-                                      const Icon(Icons.arrow_forward_ios_rounded),
+                                  trailing: const Icon(
+                                      Icons.arrow_forward_ios_rounded),
                                   onTap: () {
                                     setState(() {
                                       receiverEmail = userSnapshot.email;
@@ -358,39 +394,42 @@ class _ChatPageState extends State<ChatPage> {
                         singleChatMembers = [auth.currentUser!.uid, receiverId];
                       });
 
-var getChat = await FirebaseFirestore.instance.collection('single_chat').where('members', arrayContains: auth.currentUser!.uid ).get().then((value){
-  value.docs.forEach((element) {
-    if(element.data()['members'].contains(receiverId)){
-      tempId = element.id;
-    }
-   });
-});
+                      var getChat = await FirebaseFirestore.instance
+                          .collection('single_chat')
+                          .where('members',
+                              arrayContains: auth.currentUser!.uid)
+                          .get()
+                          .then((value) {
+                        value.docs.forEach((element) {
+                          if (element.data()['members'].contains(receiverId)) {
+                            tempId = element.id;
+                          }
+                        });
+                      });
 
-print('receiver ID id $tempId');
+                      print('receiver ID id $tempId');
 
-                      if(tempId != ''){
+                      if (tempId != '') {
                         SingleChatServices(
                           id: tempId,
-                           message: _singleChatMessageController.text,
-                           
-                              receiverName: receiverName,
-                              receiverEmail: receiverEmail,
-                              receiverImage: receiverImage,
-                              date: 'May 17, 02:33',
-                              senderId: auth.currentUser!.uid,
-                        
+                          message: _singleChatMessageController.text,
+                          receiverName: receiverName,
+                          receiverEmail: receiverEmail,
+                          receiverImage: receiverImage,
+                          date: 'May 17, 02:33',
+                          senderId: auth.currentUser!.uid,
                         ).sendMessage();
-                      }else{
+                      } else {
                         SingleChatServices(
-                              members: singleChatMembers,
-                              receiverId: receiverId,
-                              receiverName: receiverName,
-                              receiverEmail: receiverEmail,
-                              receiverImage: receiverImage,
-                              senderId: auth.currentUser!.uid,
-                              message: _singleChatMessageController.text,
-                              date: 'May 17, 02:33',)
-                          .createChat();
+                          members: singleChatMembers,
+                          receiverId: receiverId,
+                          receiverName: receiverName,
+                          receiverEmail: receiverEmail,
+                          receiverImage: receiverImage,
+                          senderId: auth.currentUser!.uid,
+                          message: _singleChatMessageController.text,
+                          date: 'May 17, 02:33',
+                        ).createChat();
                       }
 
                       setState(() {
@@ -536,6 +575,8 @@ print('receiver ID id $tempId');
                       ),
                       ElevatedButton(
                         onPressed: () async {
+                          createSearchIndex(_groupNameController.text);
+
                           final FirebaseAuth auth = FirebaseAuth.instance;
 
                           final _db = FirebaseFirestore.instance;
@@ -566,6 +607,7 @@ print('receiver ID id $tempId');
                               context,
                               MaterialPageRoute(
                                   builder: (context) => SelectGroupMembers(
+                                        searchIndex: searchIndexList,
                                         members: membersLoaded,
                                         groupName: _groupNameController.text,
                                         groupDescription:
@@ -590,9 +632,9 @@ print('receiver ID id $tempId');
 
   String searchTitle() {
     if (isChosenWidget == 0) {
-      return 'Search chat...';
+      return 'Filter chats by name...';
     } else if (isChosenWidget == 1) {
-      return 'Search group...';
+      return 'Filter groups by name...';
     } else {
       return 'Search...';
     }
@@ -764,72 +806,78 @@ print('receiver ID id $tempId');
                       Material(
                         elevation: 2,
                         borderRadius: BorderRadius.circular(12),
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.25,
-                            child: isChosenWidget == 2 || isChosenWidget == 3
-                                ? null
-                                : Row(
-                                    children: [
-                                      Expanded(
-                                        child: TextField(
-                                          controller: _searchController,
-                                          decoration: InputDecoration(
-                                            fillColor: Colors.white,
-                                            filled: true,
-                                            hintText: searchTitle(),
-                                            suffixIcon: InkWell(
-                                              onTap: () {
-                                                setState(() {
-                                                  _searchController.clear();
-                                                });
-                                              },
-                                              child: Icon(
-                                                Icons.close,
-                                                color: Colors.grey[300],
-                                              ),
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.25,
+                          child: isChosenWidget == 2 || isChosenWidget == 3
+                              ? null
+                              : Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        controller: isChosenWidget == 0
+                                            ? _userSearchController
+                                            : _groupSearchController,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            groupSearchString =
+                                                value.toLowerCase();
+                                          });
+                                        },
+                                        decoration: InputDecoration(
+                                          fillColor: Colors.white,
+                                          filled: true,
+                                          hintText: searchTitle(),
+                                          suffixIcon: InkWell(
+                                            onTap: () {
+                                              setState(() {
+                                                _userSearchController.clear();
+                                                _groupSearchController.clear();
+                                              });
+                                            },
+                                            child: Icon(
+                                              Icons.close,
+                                              color: Colors.grey[300],
                                             ),
-                                            enabledBorder: const OutlineInputBorder(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(10.0)),
-                                              borderSide: BorderSide(
-                                                color: Colors.transparent,
-                                              ),
+                                          ),
+                                          enabledBorder:
+                                              const OutlineInputBorder(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10.0)),
+                                            borderSide: BorderSide(
+                                              color: Colors.transparent,
                                             ),
-                                            focusedBorder: const OutlineInputBorder(
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(10.0)),
-                                              borderSide: BorderSide(
-                                                  color: Colors.transparent),
-                                            ),
+                                          ),
+                                          focusedBorder:
+                                              const OutlineInputBorder(
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(10.0)),
+                                            borderSide: BorderSide(
+                                                color: Colors.transparent),
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(
-                                        width: 20,
+                                    ),
+
+                                    // CircleAvatar(
+                                    //   radius: 26,
+                                    //   backgroundColor: Colors.white,
+                                    //   child: IconButton(
+                                    //     color: Colors.white,
+                                    //     onPressed: () {},
+                                    //     icon: const Icon(
+                                    //       Icons.search
+                                    //       color: Colors.black54,
+                                    //     ),
+                                    //   ),
+                                    // ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                                      CircleAvatar(
-                                        radius: 26,
-                                        backgroundColor: Colors.white,
-                                        child: IconButton(
-                                          color: Colors.white,
-                                          onPressed: () {},
-                                          icon: const Icon(
-                                            Icons.search,
-                                            color: Colors.black54,
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                          ),
+                                    ),
+                                  ],
+                                ),
                         ),
                       ),
                       const SizedBox(
@@ -860,9 +908,11 @@ print('receiver ID id $tempId');
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                   const Padding(
-                                      padding:  EdgeInsets.only(left: 84, right: 32),
-                                      child:  Icon(Icons.person, color: Colors.black54),
+                                    const Padding(
+                                      padding:
+                                          EdgeInsets.only(left: 84, right: 32),
+                                      child: Icon(Icons.person,
+                                          color: Colors.black54),
                                     ),
                                     Text(
                                       'Chats',
@@ -870,7 +920,8 @@ print('receiver ID id $tempId');
                                           color: isChosenWidget == 0
                                               ? Colors.white
                                               : Colors.black54,
-                                          fontSize: isChosenWidget == 0 ? 20 : 16),
+                                          fontSize:
+                                              isChosenWidget == 0 ? 20 : 16),
                                     ),
                                   ],
                                 ),
@@ -904,17 +955,22 @@ print('receiver ID id $tempId');
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                  const Padding(
-                                     padding:  EdgeInsets.only(left: 84,right: 32.0),
-                                     child:  Icon(Icons.group, color: Colors.black54,),
-                                   ),
+                                    const Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 84, right: 32.0),
+                                      child: Icon(
+                                        Icons.group,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
                                     Text(
                                       'Groups',
                                       style: TextStyle(
                                           color: isChosenWidget == 1
                                               ? Colors.white
                                               : Colors.black54,
-                                          fontSize: isChosenWidget == 1 ? 20 : 16),
+                                          fontSize:
+                                              isChosenWidget == 1 ? 20 : 16),
                                     ),
                                   ],
                                 ),
@@ -945,13 +1001,14 @@ print('receiver ID id $tempId');
                               ),
                               child: Center(
                                 child: Row(
-                                  
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                   const Padding(
-                                      padding:  EdgeInsets.only(left: 84, right:32.0),
-                                      child: Icon(Icons.add_comment, color: Colors.black54),
+                                    const Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 84, right: 32.0),
+                                      child: Icon(Icons.add_comment,
+                                          color: Colors.black54),
                                     ),
                                     Text(
                                       'Start Chat',
@@ -959,7 +1016,8 @@ print('receiver ID id $tempId');
                                           color: isChosenWidget == 2
                                               ? Colors.white
                                               : Colors.black54,
-                                          fontSize: isChosenWidget == 2 ? 20 : 16),
+                                          fontSize:
+                                              isChosenWidget == 2 ? 20 : 16),
                                     ),
                                   ],
                                 ),
@@ -977,7 +1035,7 @@ print('receiver ID id $tempId');
                             });
                           },
                           child: Material(
-                            elevation:2,
+                            elevation: 2,
                             borderRadius: BorderRadius.circular(20),
                             child: Container(
                               width: MediaQuery.of(context).size.width * 0.25,
@@ -990,21 +1048,25 @@ print('receiver ID id $tempId');
                               ),
                               child: Center(
                                 child: Row(
-                                  
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-const Padding(
-  padding: EdgeInsets.only(left: 84, right:32.0),
-  child:   Icon(Icons.group_add, color: Colors.black54,),
-),
+                                    const Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 84, right: 32.0),
+                                      child: Icon(
+                                        Icons.group_add,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
                                     Text(
                                       'Create group',
                                       style: TextStyle(
                                           color: isChosenWidget == 3
                                               ? Colors.white
                                               : Colors.black54,
-                                          fontSize: isChosenWidget == 3 ? 20 : 16),
+                                          fontSize:
+                                              isChosenWidget == 3 ? 20 : 16),
                                     ),
                                   ],
                                 ),

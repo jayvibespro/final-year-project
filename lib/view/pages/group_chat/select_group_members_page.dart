@@ -15,11 +15,13 @@ class SelectGroupMembers extends StatefulWidget {
     required this.groupName,
     required this.groupDescription,
     required this.members,
+    required this.searchIndex,
   }) : super(key: key);
 
   String groupName;
   String groupDescription;
   List<LoadedMembers> members;
+  List<String> searchIndex;
 
   @override
   State<SelectGroupMembers> createState() => _SelectGroupMembersState();
@@ -368,6 +370,7 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
                             groupName: widget.groupName,
                             groupAdmin: auth.currentUser!.uid,
                             groupImage: '',
+                            searchIndex: widget.searchIndex,
                           ).createGroup();
                         }
                         groupMembersIds = [];
