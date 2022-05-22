@@ -2,7 +2,6 @@ import 'package:finalyearproject/services/auth_services.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
 import 'package:finalyearproject/view/pages/posts/posts_page.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class RegistrationPage extends StatefulWidget {
   @override
@@ -12,6 +11,7 @@ class RegistrationPage extends StatefulWidget {
 class _RegistrationPageState extends State<RegistrationPage> {
   bool isHover = false;
   bool isVisible = false;
+  bool isLoading = false;
 
   Object? accountType = 1;
 
@@ -19,6 +19,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -122,211 +123,213 @@ class _RegistrationPageState extends State<RegistrationPage> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // const Padding(
-                  //   padding: EdgeInsets.fromLTRB(16.0, 16, 16, 0),
-                  //   child: Text(
-                  //     'User name',
-                  //     style: TextStyle(color: Colors.white, fontSize: 18),
-                  //   ),
-                  // ),
-                  // Padding(
-                  //   padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
-                  //   child: TextField(
-                  //     style: const TextStyle(color: Colors.white),
-                  //     decoration: InputDecoration(
-                  //       hintText: 'User name',
-                  //       hintStyle: TextStyle(color: Colors.grey[400]),
-                  //       suffixIcon: Icon(
-                  //         Icons.person,
-                  //         color: Colors.grey[300],
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(16.0, 16, 16, 0),
-                    child: Text(
-                      'Email',
-                      style: TextStyle(color: Colors.white, fontSize: 18),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
-                    child: TextField(
-                      controller: _emailController,
-                      style: const TextStyle(color: Colors.white),
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        focusColor: Colors.grey[300],
-                        suffixIcon: Icon(
-                          Icons.email,
-                          color: Colors.grey[300],
-                        ),
-                        iconColor: Colors.white,
-                        hintText: 'abc@gmail.com',
-                        hintStyle: TextStyle(color: Colors.grey[400]),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(16.0, 16, 16, 0),
+                      child: Text(
+                        'User name',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
                       ),
                     ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(16.0, 16, 16, 0),
-                    child: Text(
-                      'Password',
-                      style: TextStyle(color: Colors.white, fontSize: 18),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
-                    child: TextField(
-                      controller: _passwordController,
-                      style: const TextStyle(color: Colors.white),
-                      obscureText: isVisible ? false : true,
-                      decoration: InputDecoration(
-                        hintText: 'Password',
-                        hintStyle: TextStyle(color: Colors.grey[400]),
-                        suffixIcon: InkWell(
-                          onTap: () {
-                            setState(() {
-                              isVisible = !isVisible;
-                            });
-                          },
-                          child: Icon(
-                            isVisible ? Icons.visibility_off : Icons.visibility,
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
+                      child: TextField(
+                        controller: _nameController,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: 'User name',
+                          hintStyle: TextStyle(color: Colors.grey[400]),
+                          suffixIcon: Icon(
+                            Icons.person,
                             color: Colors.grey[300],
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Center(
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(16.0, 16, 16, 0),
                       child: Text(
-                        'Account type',
+                        'Email',
                         style: TextStyle(color: Colors.white, fontSize: 18),
                       ),
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Community',
-                              style: TextStyle(
-                                  fontSize: 12.0, color: Colors.grey[400]),
-                            ),
-                            Radio(
-                              value: 1,
-                              groupValue: accountType,
-                              onChanged: (val) {
-                                setState(() {
-                                  accountType = val;
-                                  account = 'Community';
-                                });
-                              },
-                            ),
-                            // more widgets ...
-                          ]),
-                      Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Clinical Staff',
-                              style: TextStyle(
-                                  fontSize: 12.0, color: Colors.grey[400]),
-                            ),
-                            Radio(
-                              value: 2,
-                              groupValue: accountType,
-                              onChanged: (val) {
-                                setState(() {
-                                  accountType = val;
-                                  account = 'Clinical staff';
-                                });
-                              },
-                            ),
-                            // more widgets ...
-                          ]),
-                    ],
-                  ),
-                  Center(
-                    child: Padding(
+                    Padding(
                       padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          AuthServices(
-                            email: _emailController.text,
-                            password: _passwordController.text,
-                            accountType: account,
-                          ).register();
-
-                          
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const PostsPage(title: 'Save the Future')),
-                          );
-
-Get.snackbar(
-                              "Message", "User account successfully created.",
-                              snackPosition: SnackPosition.bottom,
-                              borderRadius: 20,
-                              duration: const Duration(
-                                seconds: 4,
-                              ),
-                              margin: const EdgeInsets.all(16),
-                              isDismissible: true,
-                              dismissDirection: DismissDirection.horizontal,
-                              forwardAnimationCurve: Curves.easeInOutBack);
-                              
-
-                        },
-                        child: const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text('Register'),
+                      child: TextField(
+                        controller: _emailController,
+                        style: const TextStyle(color: Colors.white),
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          focusColor: Colors.grey[300],
+                          suffixIcon: Icon(
+                            Icons.email,
+                            color: Colors.grey[300],
+                          ),
+                          iconColor: Colors.white,
+                          hintText: 'abc@gmail.com',
+                          hintStyle: TextStyle(color: Colors.grey[400]),
                         ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(16.0, 16, 16, 0),
+                      child: Text(
+                        'Password',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
+                      child: TextField(
+                        controller: _passwordController,
+                        style: const TextStyle(color: Colors.white),
+                        obscureText: isVisible ? false : true,
+                        decoration: InputDecoration(
+                          hintText: 'Password',
+                          hintStyle: TextStyle(color: Colors.grey[400]),
+                          suffixIcon: InkWell(
+                            onTap: () {
+                              setState(() {
+                                isVisible = !isVisible;
+                              });
+                            },
+                            child: Icon(
+                              isVisible
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: Colors.grey[300],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Center(
+                        child: Text(
+                          'Account type',
+                          style: TextStyle(color: Colors.white, fontSize: 18),
+                        ),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Text(
-                          'Already have an account?',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        TextButton(
+                        Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Community',
+                                style: TextStyle(
+                                    fontSize: 12.0, color: Colors.grey[400]),
+                              ),
+                              Radio(
+                                value: 1,
+                                groupValue: accountType,
+                                onChanged: (val) {
+                                  setState(() {
+                                    accountType = val;
+                                    account = 'Community';
+                                  });
+                                },
+                              ),
+                              // more widgets ...
+                            ]),
+                        Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Clinical Staff',
+                                style: TextStyle(
+                                    fontSize: 12.0, color: Colors.grey[400]),
+                              ),
+                              Radio(
+                                value: 2,
+                                groupValue: accountType,
+                                onChanged: (val) {
+                                  setState(() {
+                                    accountType = val;
+                                    account = 'Clinical staff';
+                                  });
+                                },
+                              ),
+                              // more widgets ...
+                            ]),
+                      ],
+                    ),
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
+                        child: ElevatedButton(
                           onPressed: () {
+                            setState(() {
+                              isLoading = true;
+                            });
+
+                            AuthServices(
+                              name: _nameController.text,
+                              email: _emailController.text,
+                              password: _passwordController.text,
+                              accountType: account,
+                            ).register();
+
+                            Future.delayed(const Duration(seconds: 2));
+
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => LoginPage()),
+                                  builder: (context) => const PostsPage(
+                                      title: 'Save the Future')),
                             );
+
+                            setState(() {
+                              isLoading = false;
+                            });
                           },
-                          child: const Text(
-                            "Sign in here",
-                            style: TextStyle(color: Colors.white),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: isLoading
+                                ? const CircularProgressIndicator()
+                                : const Text('Register'),
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text(
+                            'Already have an account?',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LoginPage()),
+                              );
+                            },
+                            child: const Text(
+                              "Sign in here",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -338,7 +341,7 @@ Get.snackbar(
                 'Join us now!',
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 60,
+                    fontSize: 40,
                     color: Colors.white),
               ),
             ),

@@ -20,6 +20,8 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   String? groupSearchString;
+  String? userSearchString;
+  String? singleChatSearchString;
   String receiverName = "Receiver's name";
   String receiverId = '';
   String receiverImage = '';
@@ -29,6 +31,8 @@ class _ChatPageState extends State<ChatPage> {
   bool isHover = false;
   int isChosenWidget = 0;
   final TextEditingController _groupSearchController = TextEditingController();
+  final TextEditingController _singleChatSearchController =
+      TextEditingController();
   final TextEditingController _groupNameController = TextEditingController();
   final TextEditingController _groupDescriptionController =
       TextEditingController();
@@ -40,53 +44,105 @@ class _ChatPageState extends State<ChatPage> {
 
   final _db = FirebaseFirestore.instance;
 
-  List<String> searchIndexList = [];
+  // List<String> searchIndexList = [];
+  //
+  // createSearchIndex(String name) {
+  //   List<String> splitList = name.split(' ');
+  //
+  //   for (int i = 0; i < splitList.length; i++) {
+  //     for (int j = 0; j < splitList[i].length + i; j++) {
+  //       searchIndexList.add(splitList[i].substring(0, j + 1).toLowerCase());
+  //     }
+  //   }
+  // }
 
-  createSearchIndex(String name) {
-    List<String> splitList = name.split(' ');
-
-    for (int i = 0; i < splitList.length; i++) {
-      for (int j = 0; j < splitList[i].length + i; j++) {
-        searchIndexList.add(splitList[i].substring(0, j + 1).toLowerCase());
+  Stream<List<UserModel>> userStream() {
+    if (userSearchString == null || userSearchString == '') {
+      try {
+        return _db
+            .collection('users')
+            .where('user_id', isNotEqualTo: auth.currentUser?.uid)
+            .snapshots()
+            .map((element) {
+          final List<UserModel> dataFromFireStore = <UserModel>[];
+          for (final DocumentSnapshot<Map<String, dynamic>> doc
+              in element.docs) {
+            dataFromFireStore.add(UserModel.fromDocumentSnapshot(doc: doc));
+          }
+          return dataFromFireStore;
+        });
+      } catch (e) {
+        rethrow;
+      }
+    } else {
+      try {
+        return _db
+            .collection('users')
+            .where('user_id', isNotEqualTo: auth.currentUser?.uid)
+            .snapshots()
+            .map((element) {
+          final List<UserModel> dataFromFireStore = <UserModel>[];
+          for (final DocumentSnapshot<Map<String, dynamic>> doc
+              in element.docs) {
+            if (doc
+                .data()!['name']
+                .toLowerCase()
+                .startsWith(userSearchString?.toLowerCase())) {
+              dataFromFireStore.add(UserModel.fromDocumentSnapshot(doc: doc));
+            }
+          }
+          return dataFromFireStore;
+        });
+      } catch (e) {
+        rethrow;
       }
     }
   }
 
-  Stream<List<UserModel>> userStream() {
-    try {
-      return _db
-          .collection('users')
-          .where('user_id', isNotEqualTo: auth.currentUser?.uid)
-          .snapshots()
-          .map((element) {
-        final List<UserModel> dataFromFireStore = <UserModel>[];
-        for (final DocumentSnapshot<Map<String, dynamic>> doc in element.docs) {
-          dataFromFireStore.add(UserModel.fromDocumentSnapshot(doc: doc));
-        }
-        return dataFromFireStore;
-      });
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   Stream<List<SingleChatConversationModel>> singleChatConversationStream() {
-    try {
-      return _db
-          .collection('single_chat')
-          .where('members', arrayContains: auth.currentUser?.uid)
-          .snapshots()
-          .map((element) {
-        final List<SingleChatConversationModel> dataFromFireStore =
-            <SingleChatConversationModel>[];
-        for (final DocumentSnapshot<Map<String, dynamic>> doc in element.docs) {
-          dataFromFireStore
-              .add(SingleChatConversationModel.fromDocumentSnapshot(doc: doc));
-        }
-        return dataFromFireStore;
-      });
-    } catch (e) {
-      rethrow;
+    if (singleChatSearchString == null || singleChatSearchString == '') {
+      try {
+        return _db
+            .collection('single_chat')
+            .where('members', arrayContains: auth.currentUser?.uid)
+            .snapshots()
+            .map((element) {
+          final List<SingleChatConversationModel> dataFromFireStore =
+              <SingleChatConversationModel>[];
+          for (final DocumentSnapshot<Map<String, dynamic>> doc
+              in element.docs) {
+            dataFromFireStore.add(
+                SingleChatConversationModel.fromDocumentSnapshot(doc: doc));
+          }
+          return dataFromFireStore;
+        });
+      } catch (e) {
+        rethrow;
+      }
+    } else {
+      try {
+        return _db
+            .collection('single_chat')
+            .where('members', arrayContains: auth.currentUser?.uid)
+            .snapshots()
+            .map((element) {
+          final List<SingleChatConversationModel> dataFromFireStore =
+              <SingleChatConversationModel>[];
+          for (final DocumentSnapshot<Map<String, dynamic>> doc
+              in element.docs) {
+            if (doc
+                .data()!['receiver_name']
+                .toLowerCase()
+                .startsWith(singleChatSearchString?.toLowerCase())) {
+              dataFromFireStore.add(
+                  SingleChatConversationModel.fromDocumentSnapshot(doc: doc));
+            }
+          }
+          return dataFromFireStore;
+        });
+      } catch (e) {
+        rethrow;
+      }
     }
   }
 
@@ -121,7 +177,7 @@ class _ChatPageState extends State<ChatPage> {
               <GroupChatConversationModel>[];
           for (final DocumentSnapshot<Map<String, dynamic>> doc
               in element.docs) {
-            if (doc.data()!['search_index'].contains(groupSearchString)) {
+            if (doc.data()!['group_name'].toLowerCase().startsWith(groupSearchString?.toLowerCase())) {
               dataFromFireStore.add(
                   GroupChatConversationModel.fromDocumentSnapshot(doc: doc));
             }
@@ -272,6 +328,11 @@ class _ChatPageState extends State<ChatPage> {
                   Expanded(
                     child: TextField(
                       controller: _userSearchController,
+                      onChanged: (value) {
+                        setState(() {
+                          userSearchString = value;
+                        });
+                      },
                       decoration: const InputDecoration(
                         hintText: 'Search user...',
                         fillColor: Colors.white,
@@ -393,6 +454,7 @@ class _ChatPageState extends State<ChatPage> {
                       setState(() {
                         singleChatMembers = [auth.currentUser!.uid, receiverId];
                       });
+
 
                       var getChat = await FirebaseFirestore.instance
                           .collection('single_chat')
@@ -575,7 +637,6 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                       ElevatedButton(
                         onPressed: () async {
-                          createSearchIndex(_groupNameController.text);
 
                           final FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -607,7 +668,6 @@ class _ChatPageState extends State<ChatPage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => SelectGroupMembers(
-                                        searchIndex: searchIndexList,
                                         members: membersLoaded,
                                         groupName: _groupNameController.text,
                                         groupDescription:
@@ -815,13 +875,20 @@ class _ChatPageState extends State<ChatPage> {
                                     Expanded(
                                       child: TextField(
                                         controller: isChosenWidget == 0
-                                            ? _userSearchController
+                                            ? _singleChatSearchController
                                             : _groupSearchController,
                                         onChanged: (value) {
-                                          setState(() {
-                                            groupSearchString =
-                                                value.toLowerCase();
-                                          });
+                                          if (isChosenWidget == 0) {
+                                            setState(() {
+                                              singleChatSearchString =
+                                                  value.toLowerCase();
+                                            });
+                                          } else if (isChosenWidget == 1) {
+                                            setState(() {
+                                              groupSearchString =
+                                                  value.toLowerCase();
+                                            });
+                                          }
                                         },
                                         decoration: InputDecoration(
                                           fillColor: Colors.white,

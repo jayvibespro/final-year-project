@@ -9,12 +9,10 @@ class GroupChatServices {
   String? date;
   String? groupImage;
   String? groupName;
-  List? searchIndex;
   List? members;
   dynamic timeStamp;
 
   GroupChatServices({
-    this.searchIndex,
     this.id,
     this.senderId,
     this.groupAdmin,
@@ -29,7 +27,6 @@ class GroupChatServices {
 
   createGroup() async {
     await FirebaseFirestore.instance.collection('group_chat').add({
-      'search_index': searchIndex,
       'members': members,
       'last_message': '',
       'last_date': '',

@@ -10,9 +10,11 @@ class SingleChatServices {
   String? receiverImage;
   String? receiverEmail;
   List? members;
+  List? searchIndex;
   dynamic timeStamp;
 
   SingleChatServices({
+    this.searchIndex,
     this.id,
     this.senderId,
     this.message,
@@ -34,6 +36,7 @@ class SingleChatServices {
       'receiver_email': receiverEmail,
       'receiver_image': receiverImage,
       'receiver_name': receiverName,
+      'search_index': searchIndex,
     }).then((value) {
       FirebaseFirestore.instance
           .collection('single_chat')

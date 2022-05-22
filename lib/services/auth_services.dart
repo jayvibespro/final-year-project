@@ -45,7 +45,7 @@ class AuthServices {
       FirebaseAuth _auth = FirebaseAuth.instance;
 
       var user = FirebaseFirestore.instance.collection('users').add({
-        'name': '',
+        'name': name,
         'email': _auth.currentUser?.email,
         'user_id': _auth.currentUser?.uid,
         'gender': '',
