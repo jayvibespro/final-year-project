@@ -1,4 +1,4 @@
-import 'package:finalyearproject/view/pages/home_chat_page.dart';
+import 'package:finalyearproject/view/pages/chat_room.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -43,7 +43,7 @@ class MainPage extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return ChatPage();
+            return ChatRoomPage();
           } else {
             return LoginPage();
           }

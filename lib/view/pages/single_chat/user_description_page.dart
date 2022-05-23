@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:finalyearproject/models/comments_model.dart';
 import 'package:finalyearproject/models/user_model.dart';
-import 'package:finalyearproject/view/pages/home_chat_page.dart';
+import 'package:finalyearproject/view/pages/chat_room.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
 import 'package:finalyearproject/view/pages/posts/posts_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -104,7 +104,7 @@ class _ChatUserDescriptionPageState extends State<ChatUserDescriptionPage> {
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => ChatPage()),
+                MaterialPageRoute(builder: (context) => ChatRoomPage()),
               );
             },
             child: const Text('Chatroom'),
@@ -475,7 +475,7 @@ class _CommentUserDescriptionPageState
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => ChatPage()),
+                MaterialPageRoute(builder: (context) => ChatRoomPage()),
               );
             },
             child: const Text('Chatroom'),

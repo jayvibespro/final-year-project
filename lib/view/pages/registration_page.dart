@@ -1,6 +1,8 @@
 import 'package:finalyearproject/services/auth_services.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
-import 'package:finalyearproject/view/pages/posts/posts_page.dart';
+import 'package:finalyearproject/view/pages/profile/edit_profile_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flash/flash.dart';
 import 'package:flutter/material.dart';
 
 class RegistrationPage extends StatefulWidget {
@@ -9,6 +11,8 @@ class RegistrationPage extends StatefulWidget {
 }
 
 class _RegistrationPageState extends State<RegistrationPage> {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
   bool isHover = false;
   bool isVisible = false;
   bool isLoading = false;
@@ -20,6 +24,35 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
+
+  void _showBasicsFlash({
+    Duration? duration,
+    flashStyle = FlashBehavior.floating,
+    String? message,
+  }) {
+    showFlash(
+      context: context,
+      duration: duration,
+      builder: (context, controller) {
+        return Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Flash(
+            controller: controller,
+            behavior: flashStyle,
+            position: FlashPosition.bottom,
+            boxShadows: kElevationToShadow[1],
+            borderRadius: BorderRadius.circular(12),
+            backgroundColor: Colors.grey[50],
+            margin: const EdgeInsets.symmetric(horizontal: 300),
+            horizontalDismissDirection: HorizontalDismissDirection.horizontal,
+            child: FlashBar(
+              content: Center(child: Text(message!)),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -272,31 +305,67 @@ class _RegistrationPageState extends State<RegistrationPage> {
                             setState(() {
                               isLoading = true;
                             });
+                            if (_nameController.text != '' &&
+                                _emailController.text != '' &&
+                                _passwordController.text != '') {
+                              AuthServices(
+                                name: _nameController.text,
+                                email: _emailController.text,
+                                password: _passwordController.text,
+                                accountType: account,
+                              ).register();
+                            } else {
+                              setState(() {
+                                isLoading = false;
+                              });
+                              _showBasicsFlash(
+                                  duration: const Duration(seconds: 3),
+                                  message: 'Please fill all the credentials');
+                              return;
+                            }
 
-                            AuthServices(
-                              name: _nameController.text,
-                              email: _emailController.text,
-                              password: _passwordController.text,
-                              accountType: account,
-                            ).register();
+                            Future.delayed(const Duration(seconds: 3));
 
-                            Future.delayed(const Duration(seconds: 2));
+                            if (auth.currentUser != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const EditProfilePage()),
+                              );
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const PostsPage(
-                                      title: 'Save the Future')),
-                            );
+                              _showBasicsFlash(
+                                  duration: const Duration(seconds: 3),
+                                  message:
+                                      'Account Successfully created. You can now edit your profile information.');
 
-                            setState(() {
-                              isLoading = false;
-                            });
+                              setState(() {
+                                isLoading = false;
+                              });
+
+                              print(auth.currentUser?.uid);
+                            } else {
+                              setState(() {
+                                isLoading = false;
+                              });
+
+                              _showBasicsFlash(
+                                  duration: const Duration(seconds: 3),
+                                  message:
+                                      'Error creating account. Please try again.');
+                            }
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: isLoading
-                                ? const CircularProgressIndicator()
+                                ? Container(
+                                    width: 16,
+                                    height: 16,
+                                    child: const CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 4,
+                                    ),
+                                  )
                                 : const Text('Register'),
                           ),
                         ),

@@ -3,6 +3,7 @@ import 'package:finalyearproject/models/group_chat_model.dart';
 import 'package:finalyearproject/models/selected_members.dart';
 import 'package:finalyearproject/models/single_chat_model.dart';
 import 'package:finalyearproject/models/user_model.dart';
+import 'package:finalyearproject/services/auth_services.dart';
 import 'package:finalyearproject/services/single_chat_services.dart';
 import 'package:finalyearproject/view/pages/group_chat/group_chat_page.dart';
 import 'package:finalyearproject/view/pages/group_chat/select_group_members_page.dart';
@@ -13,12 +14,12 @@ import 'package:finalyearproject/view/pages/single_chat/single_chat_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class ChatPage extends StatefulWidget {
+class ChatRoomPage extends StatefulWidget {
   @override
-  _ChatPageState createState() => _ChatPageState();
+  _ChatRoomPageState createState() => _ChatRoomPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatRoomPageState extends State<ChatRoomPage> {
   String? groupSearchString;
   String? userSearchString;
   String? singleChatSearchString;
@@ -29,7 +30,7 @@ class _ChatPageState extends State<ChatPage> {
   List<String> singleChatMembers = [];
 
   bool isHover = false;
-  int isChosenWidget = 0;
+  int isChosenWidget = 4;
   final TextEditingController _groupSearchController = TextEditingController();
   final TextEditingController _singleChatSearchController =
       TextEditingController();
@@ -101,6 +102,7 @@ class _ChatPageState extends State<ChatPage> {
 
   Stream<List<SingleChatConversationModel>> singleChatConversationStream() {
     if (singleChatSearchString == null || singleChatSearchString == '') {
+      print('search String value: $singleChatSearchString');
       try {
         return _db
             .collection('single_chat')
@@ -177,7 +179,10 @@ class _ChatPageState extends State<ChatPage> {
               <GroupChatConversationModel>[];
           for (final DocumentSnapshot<Map<String, dynamic>> doc
               in element.docs) {
-            if (doc.data()!['group_name'].toLowerCase().startsWith(groupSearchString?.toLowerCase())) {
+            if (doc
+                .data()!['group_name']
+                .toLowerCase()
+                .startsWith(groupSearchString?.toLowerCase())) {
               dataFromFireStore.add(
                   GroupChatConversationModel.fromDocumentSnapshot(doc: doc));
             }
@@ -455,7 +460,6 @@ class _ChatPageState extends State<ChatPage> {
                         singleChatMembers = [auth.currentUser!.uid, receiverId];
                       });
 
-
                       var getChat = await FirebaseFirestore.instance
                           .collection('single_chat')
                           .where('members',
@@ -510,7 +514,7 @@ class _ChatPageState extends State<ChatPage> {
           ],
         ),
       );
-    } else {
+    } else if (isChosenWidget == 3) {
       return ListView(
         children: [
           Padding(
@@ -637,7 +641,6 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                       ElevatedButton(
                         onPressed: () async {
-
                           final FirebaseAuth auth = FirebaseAuth.instance;
 
                           final _db = FirebaseFirestore.instance;
@@ -687,6 +690,8 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ],
       );
+    } else {
+      return const PostsPage(title: 'Life Guard');
     }
   }
 
@@ -757,7 +762,7 @@ class _ChatPageState extends State<ChatPage> {
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => ChatPage()),
+                MaterialPageRoute(builder: (context) => ChatRoomPage()),
               );
             },
             child: const Text('Chatroom'),
@@ -828,6 +833,7 @@ class _ChatPageState extends State<ChatPage> {
               PopupMenuItem(
                 child: GestureDetector(
                   onTap: () {
+                    AuthServices().logout();
                     Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(builder: (context) => LoginPage()),
@@ -868,7 +874,9 @@ class _ChatPageState extends State<ChatPage> {
                         borderRadius: BorderRadius.circular(12),
                         child: SizedBox(
                           width: MediaQuery.of(context).size.width * 0.25,
-                          child: isChosenWidget == 2 || isChosenWidget == 3
+                          child: isChosenWidget == 2 ||
+                                  isChosenWidget == 3 ||
+                                  isChosenWidget == 4
                               ? null
                               : Row(
                                   children: [
@@ -897,8 +905,16 @@ class _ChatPageState extends State<ChatPage> {
                                           suffixIcon: InkWell(
                                             onTap: () {
                                               setState(() {
-                                                _userSearchController.clear();
-                                                _groupSearchController.clear();
+                                                if (isChosenWidget == 0) {
+                                                  _singleChatSearchController
+                                                      .clear();
+                                                } else if (isChosenWidget ==
+                                                    1) {
+                                                  _groupSearchController
+                                                      .clear();
+                                                } else {
+                                                  return;
+                                                }
                                               });
                                             },
                                             child: Icon(
@@ -924,19 +940,6 @@ class _ChatPageState extends State<ChatPage> {
                                         ),
                                       ),
                                     ),
-
-                                    // CircleAvatar(
-                                    //   radius: 26,
-                                    //   backgroundColor: Colors.white,
-                                    //   child: IconButton(
-                                    //     color: Colors.white,
-                                    //     onPressed: () {},
-                                    //     icon: const Icon(
-                                    //       Icons.search
-                                    //       color: Colors.black54,
-                                    //     ),
-                                    //   ),
-                                    // ),
                                     Container(
                                       decoration: BoxDecoration(
                                         color: Colors.white,
@@ -949,6 +952,53 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                       const SizedBox(
                         height: 20,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              isChosenWidget = 4;
+                            });
+                          },
+                          child: Material(
+                            elevation: 2,
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.25,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: isChosenWidget == 4
+                                    ? Colors.greenAccent
+                                    : Colors.white,
+                              ),
+                              child: Center(
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    const Padding(
+                                      padding:
+                                          EdgeInsets.only(left: 84, right: 32),
+                                      child: Icon(Icons.feed,
+                                          color: Colors.black54),
+                                    ),
+                                    Text(
+                                      'Feeds',
+                                      style: TextStyle(
+                                          color: isChosenWidget == 4
+                                              ? Colors.white
+                                              : Colors.green,
+                                          fontSize:
+                                              isChosenWidget == 4 ? 24 : 18),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(16.0),

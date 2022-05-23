@@ -1,4 +1,4 @@
-import 'package:finalyearproject/view/pages/home_chat_page.dart';
+import 'package:finalyearproject/view/pages/chat_room.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
 import 'package:finalyearproject/view/pages/posts/posts_page.dart';
 import 'package:flutter/material.dart';
@@ -71,7 +71,7 @@ class _GroupDescriptionPageState extends State<GroupDescriptionPage> {
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => ChatPage()),
+                MaterialPageRoute(builder: (context) => ChatRoomPage()),
               );
             },
             child: const Text('Chatroom'),

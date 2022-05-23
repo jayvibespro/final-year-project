@@ -6,7 +6,7 @@ import 'package:finalyearproject/view/pages/profile/profile_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../home_chat_page.dart';
+import '../chat_room.dart';
 import '../login_page.dart';
 
 class SelectGroupMembers extends StatefulWidget {
@@ -27,23 +27,35 @@ class SelectGroupMembers extends StatefulWidget {
 
 class _SelectGroupMembersState extends State<SelectGroupMembers> {
   bool isHover = false;
-
+  List<LoadedMembers> searchList = <LoadedMembers>[];
   List<String> groupMembersIds = [];
   List<MembersSelected> selectedMembers = [];
+  String? userSearchString = '';
 
-  isSelected() {
-    if (selectedMembers == []) {
+  final TextEditingController _userSearchController = TextEditingController();
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  final _db = FirebaseFirestore.instance;
+
+  searchFunction() {
+    widget.members.forEach((element) {
+      if (element.memberName
+          .toLowerCase()
+          .startsWith(userSearchString.toString())) {
+        searchList.add(element);
+      } else {
+        return;
+      }
+    });
+  }
+
+  bool isInSearch() {
+    if (searchList == []) {
       return true;
     } else {
       return false;
     }
   }
-
-  final TextEditingController _userSearchController = TextEditingController();
-
-  final FirebaseAuth auth = FirebaseAuth.instance;
-
-  final _db = FirebaseFirestore.instance;
 
   @override
   initState() {
@@ -107,7 +119,7 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => ChatPage()),
+                MaterialPageRoute(builder: (context) => ChatRoomPage()),
               );
             },
             child: const Text('Chatroom'),
@@ -202,6 +214,10 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
                     Expanded(
                       child: TextField(
                         controller: _userSearchController,
+                        onChanged: (value) {
+                          userSearchString = value.toLowerCase();
+                          searchFunction();
+                        },
                         decoration: const InputDecoration(
                           hintText: 'Search user...',
                           fillColor: Colors.white,
@@ -217,9 +233,10 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
                       onPressed: () {
                         setState(() {
                           _userSearchController.clear();
+                          searchList = [];
                         });
                       },
-                      icon: const Icon(Icons.search),
+                      icon: const Icon(Icons.clear),
                     ),
                   ],
                 ),
@@ -345,7 +362,8 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
                       onPressed: () {
                         Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (context) => ChatPage()),
+                            MaterialPageRoute(
+                                builder: (context) => ChatRoomPage()),
                             (route) => false);
                       },
                       child: const Padding(
@@ -376,7 +394,8 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
 
                         Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (context) => ChatPage()),
+                            MaterialPageRoute(
+                                builder: (context) => ChatRoomPage()),
                             (route) => false);
                       },
                       child: const Padding(

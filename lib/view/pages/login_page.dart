@@ -1,6 +1,7 @@
 import 'package:finalyearproject/services/auth_services.dart';
-import 'package:finalyearproject/view/pages/posts/posts_page.dart';
+import 'package:finalyearproject/view/pages/chat_room.dart';
 import 'package:finalyearproject/view/pages/registration_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flash/flash.dart';
 import 'package:flutter/material.dart';
 
@@ -14,6 +15,8 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false;
   bool isVisible = false;
 
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -22,6 +25,7 @@ class _LoginPageState extends State<LoginPage> {
   void _showBasicsFlash({
     Duration? duration,
     flashStyle = FlashBehavior.floating,
+    String? message,
   }) {
     showFlash(
       context: context,
@@ -36,10 +40,10 @@ class _LoginPageState extends State<LoginPage> {
             boxShadows: kElevationToShadow[1],
             borderRadius: BorderRadius.circular(12),
             backgroundColor: Colors.grey[50],
-            margin: const EdgeInsets.symmetric(horizontal: 310),
+            margin: const EdgeInsets.symmetric(horizontal: 300),
             horizontalDismissDirection: HorizontalDismissDirection.horizontal,
             child: FlashBar(
-              content: const Center(child: Text('Welcome back user!')),
+              content: Center(child: Text(message!)),
             ),
           ),
         );
@@ -220,28 +224,42 @@ class _LoginPageState extends State<LoginPage> {
                           setState(() {
                             isLoading = true;
                           });
-                          AuthServices(
-                                  email: _emailController.text,
-                                  password: _passwordController.text)
-                              .login();
+                          if (_emailController.text != '' &&
+                              _passwordController.text != '') {
+                            AuthServices(
+                                    email: _emailController.text,
+                                    password: _passwordController.text)
+                                .login();
+                          } else {
+                            _showBasicsFlash(
+                              duration: const Duration(seconds: 3),
+                              message:
+                                  'Make sure you fill all the credentials and try again.',
+                            );
+                            setState(() {
+                              isLoading = false;
+                            });
+                          }
                           await Future.delayed(const Duration(seconds: 2));
 
-                          setState(() {
-                            isLoading = false;
-                          });
+                          if (auth.currentUser != null) {
+                            setState(() {
+                              isLoading = false;
+                            });
 
-                          _showBasicsFlash(
-                              duration: const Duration(seconds: 3));
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ChatRoomPage()),
+                            );
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const PostsPage(title: 'Save the Future')),
-                          );
-
-                          _showBasicsFlash(
-                              duration: const Duration(seconds: 3));
+                            _showBasicsFlash(
+                              duration: const Duration(seconds: 3),
+                              message: 'Welcome back!',
+                            );
+                          } else {
+                            return;
+                          }
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
@@ -252,7 +270,8 @@ class _LoginPageState extends State<LoginPage> {
                                   child: const CircularProgressIndicator(
                                     color: Colors.white,
                                     strokeWidth: 4,
-                                  ))
+                                  ),
+                                )
                               : const Text('Sign in'),
                         ),
                       ),

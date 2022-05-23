@@ -5,7 +5,7 @@ import 'package:finalyearproject/view/pages/profile/profile_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../home_chat_page.dart';
+import '../chat_room.dart';
 import '../login_page.dart';
 
 class SelectReceiverPage extends StatefulWidget {
@@ -101,7 +101,7 @@ class _SelectReceiverPageState extends State<SelectReceiverPage> {
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => ChatPage()),
+                MaterialPageRoute(builder: (context) => ChatRoomPage()),
               );
             },
             child: const Text('Chatroom'),

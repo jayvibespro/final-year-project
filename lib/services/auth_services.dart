@@ -5,9 +5,9 @@ import 'package:get/get.dart';
 
 class AuthServices {
   String? id;
-  String email;
+  String? email;
   String? userId;
-  String password;
+  String? password;
   String? name;
   String? phone;
   String? idNumber;
@@ -28,18 +28,18 @@ class AuthServices {
     this.name,
     this.idNumber,
     this.facility,
-    required this.email,
+    this.email,
     this.gender,
     this.avatarUrl,
-    required this.password,
+    this.password,
   });
 
   register() async {
     try {
       UserCredential userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
+        email: email!,
+        password: password!,
       );
 
       FirebaseAuth _auth = FirebaseAuth.instance;
@@ -57,16 +57,6 @@ class AuthServices {
         'account_type': accountType,
         'avatar_url': '',
       });
-      Get.snackbar("Message", "User account successfully created.",
-          snackPosition: SnackPosition.bottom,
-          borderRadius: 20,
-          duration: const Duration(
-            seconds: 4,
-          ),
-          margin: const EdgeInsets.all(16),
-          isDismissible: true,
-          dismissDirection: DismissDirection.horizontal,
-          forwardAnimationCurve: Curves.easeInOutBack);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         print('The password provided is too weak.');
@@ -106,8 +96,8 @@ class AuthServices {
     try {
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
+        email: email!,
+        password: password!,
       );
       Get.snackbar("Message", "User login successfully.",
           snackPosition: SnackPosition.bottom,
@@ -144,14 +134,6 @@ class AuthServices {
   logout() async {
     try {
       await FirebaseAuth.instance.signOut();
-      Get.snackbar("Message", "User logout successfully.",
-          snackPosition: SnackPosition.bottom,
-          borderRadius: 20,
-          duration: const Duration(seconds: 4),
-          margin: const EdgeInsets.all(15),
-          isDismissible: true,
-          dismissDirection: DismissDirection.horizontal,
-          forwardAnimationCurve: Curves.easeInOutBack);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         print('No user found for that email.');
