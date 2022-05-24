@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finalyearproject/models/user_model.dart';
 import 'package:finalyearproject/services/auth_services.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
-import 'package:finalyearproject/view/pages/profile/edit_profile_page.dart';
+import 'package:finalyearproject/view/pages/profile/profile_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flash/flash.dart';
 import 'package:flutter/material.dart';
@@ -12,10 +14,13 @@ class RegistrationPage extends StatefulWidget {
 
 class _RegistrationPageState extends State<RegistrationPage> {
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final _db = FirebaseFirestore.instance;
 
   bool isHover = false;
   bool isVisible = false;
   bool isLoading = false;
+
+  List<UserModel> userData = <UserModel>[];
 
   Object? accountType = 1;
 
@@ -327,11 +332,28 @@ class _RegistrationPageState extends State<RegistrationPage> {
                             Future.delayed(const Duration(seconds: 3));
 
                             if (auth.currentUser != null) {
+                              try {
+                                _db
+                                    .collection('users')
+                                    .where('user_id',
+                                        isEqualTo: auth.currentUser?.uid)
+                                    .get()
+                                    .then((element) {
+                                  for (final DocumentSnapshot<
+                                          Map<String, dynamic>> doc
+                                      in element.docs) {
+                                    userData.add(UserModel.fromDocumentSnapshot(
+                                        doc: doc));
+                                  }
+                                });
+                              } catch (e) {
+                                rethrow;
+                              }
+
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) =>
-                                        const EditProfilePage()),
+                                    builder: (context) => const ProfilePage()),
                               );
 
                               _showBasicsFlash(

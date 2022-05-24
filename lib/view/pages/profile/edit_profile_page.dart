@@ -1,10 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finalyearproject/models/user_model.dart';
+import 'package:finalyearproject/services/auth_services.dart';
 import 'package:finalyearproject/view/pages/chat_room.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
 import 'package:finalyearproject/view/pages/posts/posts_page.dart';
+import 'package:finalyearproject/view/pages/profile/profile_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class EditProfilePage extends StatefulWidget {
-  const EditProfilePage({Key? key}) : super(key: key);
+  EditProfilePage({Key? key, required this.userData}) : super(key: key);
+
+  UserModel userData;
 
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
@@ -12,8 +19,30 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   bool isHover = false;
+
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _genderController = TextEditingController();
+  final TextEditingController _facilityController = TextEditingController();
+  final TextEditingController _idController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _professionController = TextEditingController();
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  final _db = FirebaseFirestore.instance;
+
   @override
   Widget build(BuildContext context) {
+    _nameController.text = widget.userData.name;
+    _emailController.text = widget.userData.email;
+    _genderController.text = widget.userData.gender;
+    _facilityController.text = widget.userData.facility;
+    _idController.text = widget.userData.idNumber;
+    _phoneController.text = widget.userData.phone;
+    _locationController.text = widget.userData.region;
+    _professionController.text = widget.userData.profession;
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -123,7 +152,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const EditProfilePage()));
+                              builder: (context) => const ProfilePage()));
                     },
                     child: const Center(child: Text("Profile"))),
                 value: 4,
@@ -169,12 +198,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.only(top: 16),
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
                 child: Center(
                   child: Text(
-                    'Sarah Thomas',
-                    style: TextStyle(fontSize: 20),
+                    '${widget.userData.name}',
+                    style: const TextStyle(fontSize: 20),
                   ),
                 ),
               ),
@@ -197,8 +226,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 8.0, horizontal: 32),
                 child: Container(
-                  child: const TextField(
-                    decoration: InputDecoration(
+                  child: TextField(
+                    controller: _nameController,
+                    keyboardType: TextInputType.name,
+                    decoration: const InputDecoration(
                         hintText: 'Sarah Thomas',
                         label: Text('Name'),
                         border: InputBorder.none,
@@ -215,8 +246,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 8.0, horizontal: 32),
                 child: Container(
-                  child: const TextField(
-                    decoration: InputDecoration(
+                  child: TextField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: const InputDecoration(
                         hintText: '+255 694 059 986',
                         label: Text('Phone number'),
                         border: InputBorder.none,
@@ -233,8 +266,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 8.0, horizontal: 32),
                 child: Container(
-                  child: const TextField(
-                    decoration: InputDecoration(
+                  child: TextField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
                         hintText: 'sarahthomas@gmail.com',
                         label: Text('Email'),
                         border: InputBorder.none,
@@ -251,8 +286,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 8.0, horizontal: 32),
                 child: Container(
-                  child: const TextField(
-                    decoration: InputDecoration(
+                  child: TextField(
+                    controller: _idController,
+                    keyboardType: TextInputType.text,
+                    decoration: const InputDecoration(
                         hintText: '185*******123',
                         label: Text('ID number'),
                         border: InputBorder.none,
@@ -269,8 +306,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 8.0, horizontal: 32),
                 child: Container(
-                  child: const TextField(
-                    decoration: InputDecoration(
+                  child: TextField(
+                    controller: _genderController,
+                    keyboardType: TextInputType.text,
+                    decoration: const InputDecoration(
                         hintText: 'Female',
                         label: Text('Gender'),
                         border: InputBorder.none,
@@ -287,8 +326,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 8.0, horizontal: 32),
                 child: Container(
-                  child: const TextField(
-                    decoration: InputDecoration(
+                  child: TextField(
+                    controller: _professionController,
+                    keyboardType: TextInputType.text,
+                    decoration: const InputDecoration(
                         hintText: 'Nurse',
                         label: Text('Profession'),
                         border: InputBorder.none,
@@ -305,8 +346,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 8.0, horizontal: 32),
                 child: Container(
-                  child: const TextField(
-                    decoration: InputDecoration(
+                  child: TextField(
+                    controller: _facilityController,
+                    keyboardType: TextInputType.text,
+                    decoration: const InputDecoration(
                         hintText: 'Mwananyamala hospital',
                         label: Text('Working facility'),
                         border: InputBorder.none,
@@ -323,8 +366,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 padding:
                     const EdgeInsets.symmetric(vertical: 8.0, horizontal: 32),
                 child: Container(
-                  child: const TextField(
-                    decoration: InputDecoration(
+                  child: TextField(
+                    controller: _locationController,
+                    keyboardType: TextInputType.text,
+                    decoration: const InputDecoration(
                         hintText: 'Dar Es Salaam',
                         label: Text('Region'),
                         border: InputBorder.none,
@@ -362,6 +407,30 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ElevatedButton(
                       style: const ButtonStyle(),
                       onPressed: () {
+                        AuthServices(
+                          id: widget.userData.id,
+                          name: _nameController.text,
+                          email: _emailController.text,
+                          gender: _genderController.text,
+                          facility: _facilityController.text,
+                          region: _locationController.text,
+                          profession: _professionController.text,
+                          phone: _phoneController.text,
+                          idNumber: _idController.text,
+                          avatarUrl: '',
+                        ).editUserInfo();
+
+                        setState(() {
+                          _idController.clear();
+                          _phoneController.clear();
+                          _professionController.clear();
+                          _locationController.clear();
+                          _idController.clear();
+                          _facilityController.clear();
+                          _genderController.clear();
+                          _nameController.clear();
+                        });
+
                         Navigator.pop(context);
                       },
                       child: const Padding(

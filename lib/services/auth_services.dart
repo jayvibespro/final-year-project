@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class AuthServices {
   String? id;
@@ -60,35 +58,11 @@ class AuthServices {
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         print('The password provided is too weak.');
-        Get.snackbar("Message", "The password provided is too weak.",
-            snackPosition: SnackPosition.bottom,
-            borderRadius: 20,
-            duration: const Duration(seconds: 4),
-            margin: const EdgeInsets.all(15),
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            forwardAnimationCurve: Curves.easeInOutBack);
       } else if (e.code == 'email-already-in-use') {
         print('The account already exists for that email.');
-        Get.snackbar("Message", "Account already exists.",
-            snackPosition: SnackPosition.bottom,
-            borderRadius: 20,
-            duration: const Duration(seconds: 4),
-            margin: const EdgeInsets.all(15),
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            forwardAnimationCurve: Curves.easeInOutBack);
       }
     } catch (e) {
       print(e);
-      Get.snackbar("Erro", "e",
-          snackPosition: SnackPosition.bottom,
-          borderRadius: 20,
-          duration: const Duration(seconds: 4),
-          margin: const EdgeInsets.all(15),
-          isDismissible: true,
-          dismissDirection: DismissDirection.horizontal,
-          forwardAnimationCurve: Curves.easeInOutBack);
     }
   }
 
@@ -99,34 +73,11 @@ class AuthServices {
         email: email!,
         password: password!,
       );
-      Get.snackbar("Message", "User login successfully.",
-          snackPosition: SnackPosition.bottom,
-          borderRadius: 20,
-          duration: const Duration(seconds: 4),
-          margin: const EdgeInsets.all(15),
-          isDismissible: true,
-          dismissDirection: DismissDirection.horizontal,
-          forwardAnimationCurve: Curves.easeInOutBack);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         print('No user found for that email.');
-        Get.snackbar("Message", "No user found for that email.",
-            snackPosition: SnackPosition.bottom,
-            borderRadius: 20,
-            duration: const Duration(seconds: 3),
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            forwardAnimationCurve: Curves.easeInOutBack);
       } else if (e.code == 'wrong-password') {
         print('Wrong password provided for that user.');
-        Get.snackbar("Message", "Wrong password",
-            snackPosition: SnackPosition.bottom,
-            borderRadius: 20,
-            duration: const Duration(seconds: 4),
-            margin: const EdgeInsets.all(15),
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            forwardAnimationCurve: Curves.easeInOutBack);
       }
     }
   }
@@ -137,23 +88,8 @@ class AuthServices {
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         print('No user found for that email.');
-        Get.snackbar("Message", "No user found for that email.",
-            snackPosition: SnackPosition.bottom,
-            borderRadius: 20,
-            duration: const Duration(seconds: 3),
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            forwardAnimationCurve: Curves.easeInOutBack);
       } else if (e.code == 'wrong-password') {
         print('Wrong password provided for that user.');
-        Get.snackbar("Message", "Wrong password",
-            snackPosition: SnackPosition.bottom,
-            borderRadius: 20,
-            duration: const Duration(seconds: 4),
-            margin: const EdgeInsets.all(15),
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            forwardAnimationCurve: Curves.easeInOutBack);
       }
     }
   }
@@ -164,7 +100,7 @@ class AuthServices {
 
       var user = FirebaseFirestore.instance.collection('users').doc(id).update({
         'name': name,
-        'email': _auth.currentUser?.email,
+        'email': email,
         'user_id': _auth.currentUser?.uid,
         'gender': gender,
         'region': region,
@@ -172,51 +108,16 @@ class AuthServices {
         'profession': profession,
         'facility': facility,
         'id_number': idNumber,
-        'account_type': accountType,
         'avatar_url': avatarUrl,
       });
-      Get.snackbar("Message", "User account successfully created.",
-          snackPosition: SnackPosition.bottom,
-          borderRadius: 20,
-          duration: const Duration(
-            seconds: 4,
-          ),
-          margin: const EdgeInsets.all(16),
-          isDismissible: true,
-          dismissDirection: DismissDirection.horizontal,
-          forwardAnimationCurve: Curves.easeInOutBack);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         print('The password provided is too weak.');
-        Get.snackbar("Message", "The password provided is too weak.",
-            snackPosition: SnackPosition.bottom,
-            borderRadius: 20,
-            duration: const Duration(seconds: 4),
-            margin: const EdgeInsets.all(15),
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            forwardAnimationCurve: Curves.easeInOutBack);
       } else if (e.code == 'email-already-in-use') {
         print('The account already exists for that email.');
-        Get.snackbar("Message", "Account already exists.",
-            snackPosition: SnackPosition.bottom,
-            borderRadius: 20,
-            duration: const Duration(seconds: 4),
-            margin: const EdgeInsets.all(15),
-            isDismissible: true,
-            dismissDirection: DismissDirection.horizontal,
-            forwardAnimationCurve: Curves.easeInOutBack);
       }
     } catch (e) {
       print(e);
-      Get.snackbar("Erro", "e",
-          snackPosition: SnackPosition.bottom,
-          borderRadius: 20,
-          duration: const Duration(seconds: 4),
-          margin: const EdgeInsets.all(15),
-          isDismissible: true,
-          dismissDirection: DismissDirection.horizontal,
-          forwardAnimationCurve: Curves.easeInOutBack);
     }
   }
 }

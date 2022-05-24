@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../view/pages/chat_room.dart';
 import '../view/pages/login_page.dart';
 import '../view/pages/posts/posts_page.dart';
-import '../view/pages/profile/edit_profile_page.dart';
 
 class CustomAppBar extends StatefulWidget {
   const CustomAppBar({Key? key}) : super(key: key);
@@ -121,10 +120,10 @@ class _CustomAppBarState extends State<CustomAppBar> {
             PopupMenuItem(
               child: GestureDetector(
                   onTap: () {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const EditProfilePage()));
+                    // Navigator.pushReplacement(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (context) => const EditProfilePage()));
                   },
                   child: const Center(child: Text("Profile"))),
               value: 4,
