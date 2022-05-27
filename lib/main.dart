@@ -28,9 +28,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        appBarTheme: const AppBarTheme(foregroundColor: Colors.black,
-        backgroundColor: Colors.white
-        ),
+        appBarTheme: const AppBarTheme(
+            foregroundColor: Colors.black, backgroundColor: Colors.white),
       ),
       home: const MainPage(),
     );
@@ -42,6 +41,9 @@ class MainPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const _tabletScreenWidth = 768;
+    final _screenSizeWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
@@ -49,7 +51,9 @@ class MainPage extends StatelessWidget {
           if (snapshot.hasData) {
             return ChatRoomPage();
           } else {
-            return LoginPage();
+            return _screenSizeWidth < _tabletScreenWidth
+                ? MobileLoginPage()
+                : LoginPage();
           }
         },
       ),

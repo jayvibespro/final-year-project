@@ -46,7 +46,6 @@ class _BaseAppBarState extends State<BaseAppBar> {
           : IconButton(
               icon: const Icon(
                 Icons.arrow_back,
-                
               ),
               onPressed: () {
                 Navigator.pop(context);
@@ -75,9 +74,10 @@ class _BaseAppBarState extends State<BaseAppBar> {
       actions: [
         _screenWidth < _tabletScreen
             ? Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 child: Container(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                       color: Colors.blue.shade50,
                       borderRadius: BorderRadius.circular(20)),
@@ -222,7 +222,10 @@ class _BaseAppBarState extends State<BaseAppBar> {
                     AuthServices(email: '', password: '').logout();
                     Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => LoginPage()),
+                        MaterialPageRoute(
+                            builder: (context) => _screenWidth < _tabletScreen
+                                ? MobileLoginPage()
+                                : LoginPage()),
                         (route) => false);
                   },
                   child: const Center(child: Text("LogOut"))),
