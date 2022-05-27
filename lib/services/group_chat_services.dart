@@ -34,7 +34,11 @@ class GroupChatServices {
       'group_description': groupDescription,
       'group_image': groupImage,
       'group_name': groupName,
-    });
+      'group_id': '',
+    }).then((value) => FirebaseFirestore.instance
+        .collection('group_chat')
+        .doc(value.id)
+        .update({'group_id': value.id}));
   }
 
   sendMessage() async {

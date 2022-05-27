@@ -1,12 +1,24 @@
-import 'package:finalyearproject/view/pages/chat_room.dart';
-import 'package:finalyearproject/view/pages/login_page.dart';
-import 'package:finalyearproject/view/pages/posts/posts_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finalyearproject/models/group_description_model.dart';
+import 'package:finalyearproject/models/user_model.dart';
+import 'package:finalyearproject/widgets/app_bar.dart';
+import 'package:finalyearproject/widgets/drawer.dart';
 import 'package:flutter/material.dart';
 
-import '../profile/profile_page.dart';
+class Student {
+  String name;
+  int age;
+
+  Student({
+    required this.name,
+    required this.age,
+  });
+}
 
 class GroupDescriptionPage extends StatefulWidget {
-  const GroupDescriptionPage({Key? key}) : super(key: key);
+  GroupDescriptionPage({Key? key, required this.groupId}) : super(key: key);
+
+  String groupId;
 
   @override
   State<GroupDescriptionPage> createState() => _GroupDescriptionPageState();
@@ -14,283 +26,189 @@ class GroupDescriptionPage extends StatefulWidget {
 
 class _GroupDescriptionPageState extends State<GroupDescriptionPage> {
   bool isHover = false;
+  final _db = FirebaseFirestore.instance;
+
+  List<UserModel> groupMembers = <UserModel>[];
+
+  Future<List<GroupDescriptionModel>> groupDescriptionFuture() {
+    try {
+      return _db
+          .collection('group_chat')
+          .where('group_id', isEqualTo: widget.groupId)
+          .get()
+          .then((element) {
+        final List<GroupDescriptionModel> dataFromFireStore =
+            <GroupDescriptionModel>[];
+        for (final DocumentSnapshot<Map<String, dynamic>> doc in element.docs) {
+          dataFromFireStore
+              .add(GroupDescriptionModel.fromDocumentSnapshot(doc: doc));
+        }
+        dataFromFireStore.forEach((element) {
+          element.members.forEach((id) async {
+            await _db
+                .collection('users')
+                .where('user_id', isEqualTo: id)
+                .get()
+                .then((value) {
+              for (final DocumentSnapshot<Map<String, dynamic>> doc
+                  in value.docs) {
+                groupMembers.add(UserModel.fromDocumentSnapshot(doc: doc));
+              }
+            });
+          });
+        });
+        return dataFromFireStore;
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Stream<List<UserModel>> userStream() {
+    try {
+      return _db.collection("users").snapshots().map((element) {
+        final List<UserModel> dataFromFireStore = <UserModel>[];
+        for (final DocumentSnapshot<Map<String, dynamic>> doc in element.docs) {
+          dataFromFireStore.add(UserModel.fromDocumentSnapshot(doc: doc));
+        }
+
+        return dataFromFireStore;
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final List<UserModel> loadedMembers = groupMembers;
+    const _tabletScreenWidth = 768;
+    final _screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: Row(
-          children: const [
-            Icon(
-              Icons.person,
-              color: Colors.black,
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            Text(
-              "Save the future",
-              style: TextStyle(color: Colors.black),
-            ),
-          ],
-        ),
-        actions: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 600),
-            child: InkWell(
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          const PostsPage(title: 'Save the Future')),
-                );
-              },
-              onHover: (value) {
-                setState(() {
-                  isHover = value;
-                });
-              },
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'Home',
-                    style: TextStyle(
-                        color: Colors.black, fontSize: (isHover) ? 16 : 14),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {},
-            child: const Text('About us'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => ChatRoomPage()),
-              );
-            },
-            child: const Text('Chatroom'),
-          ),
-          TextButton(
-            onPressed: () {},
-            child: const Text('Stories'),
-          ),
-          TextButton(
-            onPressed: () {},
-            child: const Text('Reports'),
-          ),
-          TextButton(
-            onPressed: () {},
-            child: const Text('Challenges'),
-          ),
-          TextButton(
-            onPressed: () {},
-            child: const Text('Discover'),
-          ),
-          const SizedBox(
-            width: 100,
-          ),
-          PopupMenuButton(
-            color: Colors.white,
-            icon: const Icon(
-              Icons.person,
-              color: Colors.black,
-            ),
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                child: Center(
-                  child: Icon(
-                    Icons.person,
-                    color: Colors.black,
-                  ),
-                ),
-                value: 1,
-              ),
-              const PopupMenuItem(
-                child: Center(child: Text("Sarah Thomas")),
-                value: 2,
-              ),
-              const PopupMenuItem(
-                child: Divider(),
-                value: 3,
-              ),
-              PopupMenuItem(
-                child: GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ProfilePage()));
-                    },
-                    child: Center(child: Text("Profile"))),
-                value: 4,
-              ),
-              const PopupMenuItem(
-                child: Center(child: Text("Settings")),
-                value: 5,
-              ),
-              PopupMenuItem(
-                child: GestureDetector(
-                    onTap: () {
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => LoginPage()),
-                          (route) => false);
-                    },
-                    child: const Center(child: Text("LogOut"))),
-                value: 6,
-              ),
-            ],
-          ),
-        ],
-        backgroundColor: Colors.white,
+      drawer: _screenWidth < _tabletScreenWidth ? const CustomDrawer(): const SizedBox(),
+      appBar: BaseAppBar(
+        appBar: AppBar(),
       ),
       backgroundColor: const Color(0xFFF2F3F4),
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 300),
+        padding: _screenWidth <= _tabletScreenWidth
+            ? const EdgeInsets.symmetric(vertical: 0, horizontal: 0)
+            : const EdgeInsets.symmetric(vertical: 0, horizontal: 300),
         child: Container(
           width: double.infinity,
           color: Colors.grey[50],
-          child: ListView(children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 16),
-              child: CircleAvatar(
-                backgroundColor: Colors.white,
-                radius: 70,
-                child: Icon(
-                  Icons.group,
-                  size: 60,
-                ),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(top: 16),
-              child: Center(
-                child: Text(
-                  'Majamaa Wauguzi',
-                  style: TextStyle(fontSize: 28),
-                ),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(top: 16, left: 32, right: 32),
-              child: Divider(),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(top: 16, bottom: 8),
-              child: Center(
-                child: Text(
-                  'Members: 56',
-                  style: TextStyle(color: Colors.black54, fontSize: 18),
-                ),
-              ),
-            ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 32),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                child: const ListTile(
-                  title: Text('Millenium Malamla'),
-                  subtitle: Text('milleniumanthony@gmail.com'),
-                  leading: Icon(Icons.person),
-                  trailing: Text('Admin'),
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 32),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                child: const ListTile(
-                  title: Text('Minja Hassan'),
-                  subtitle: Text('minja@gmail.com'),
-                  leading: Icon(Icons.person),
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 32),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                child: const ListTile(
-                  title: Text('Masanja Sanjai'),
-                  subtitle: Text('masanja@gmail.com'),
-                  leading: Icon(Icons.person),
-                  trailing: Text('Admin'),
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 32),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                child: const ListTile(
-                  title: Text('Samia Minja Hassan'),
-                  subtitle: Text('samiahassan@gmail.com'),
-                  leading: Icon(Icons.person),
-                  trailing: Text('Admin'),
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 32),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                child: const ListTile(
-                  title: Text('Mrisho Mpoto'),
-                  subtitle: Text('mpoto001@gmail.com'),
-                  leading: Icon(Icons.person),
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(top: 16, left: 32, right: 32),
-              child: Divider(),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: ElevatedButton(
-                style: const ButtonStyle(),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('Delete group'),
-                ),
-              ),
-            ),
-          ]),
+          child: FutureBuilder<List<GroupDescriptionModel>>(
+            future: groupDescriptionFuture(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (snapshot.hasError) {
+                return const Center(
+                  child: Text('An error occurred...'),
+                );
+              } else if (snapshot.hasData) {
+                return ListView.builder(
+                    itemCount: snapshot.data!.length,
+                    itemBuilder: (context, index) {
+                      GroupDescriptionModel descriptionSnapshot =
+                          snapshot.data![index];
+                      return Column(children: [
+                        const Padding(
+                          padding: EdgeInsets.only(top: 16),
+                          child: CircleAvatar(
+                            backgroundColor: Colors.white,
+                            radius: 70,
+                            child: Icon(
+                              Icons.group,
+                              size: 60,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: Center(
+                            child: Text(
+                              '${descriptionSnapshot.groupName}',
+                              style: const TextStyle(fontSize: 28),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: Center(
+                            child: Text(
+                              '${descriptionSnapshot.groupDescription}',
+                            ),
+                          ),
+                        ),
+                        const Padding(
+                          padding:
+                              EdgeInsets.only(top: 16, left: 32, right: 32),
+                          child: Divider(),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16, bottom: 8),
+                          child: Center(
+                            child: Text(
+                              'Group members count: ${descriptionSnapshot.members.length}',
+                              style: const TextStyle(
+                                  color: Colors.black54, fontSize: 18),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 600,
+                          child: StreamBuilder<List<UserModel>>(
+                            stream: userStream(),
+                            builder: (context, snapshot) {
+                              UserModel? userSnapshot = snapshot.data![index];
+                              return ListView.builder(
+                                  itemCount: snapshot.data!.length,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Card(
+                                        child: ListTile(
+                                          title: Text('${userSnapshot.name}'),
+                                          subtitle:
+                                              Text('${userSnapshot.email}'),
+                                        ),
+                                      ),
+                                    );
+                                  });
+                            },
+                          ),
+                        ),
+                        const Padding(
+                          padding:
+                              EdgeInsets.only(top: 16, left: 32, right: 32),
+                          child: Divider(),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(32.0),
+                          child: ElevatedButton(
+                            style: const ButtonStyle(),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text('Delete group'),
+                            ),
+                          ),
+                        ),
+                      ]);
+                    });
+              } else {
+                return const Center(
+                  child: Text('An error occurred...'),
+                );
+              }
+            },
+          ),
         ),
       ),
     );

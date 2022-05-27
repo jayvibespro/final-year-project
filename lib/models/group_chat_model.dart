@@ -8,9 +8,11 @@ class GroupChatConversationModel {
   String lastMessage;
   String lastDate;
   List members;
+  String groupId;
 
   GroupChatConversationModel({
     required this.members,
+    required this.groupId,
     required this.groupName,
     required this.groupDescription,
     required this.lastMessage,
@@ -24,6 +26,7 @@ class GroupChatConversationModel {
     return GroupChatConversationModel(
       id: doc.id,
       lastMessage: doc.data()!['last_message'],
+      groupId: doc.data()!['group_id'],
       groupImage: doc.data()!['group_image'],
       groupDescription: doc.data()!['group_description'],
       groupName: doc.data()!['group_name'],

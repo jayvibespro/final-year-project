@@ -246,7 +246,10 @@ class _LoginPageState extends State<LoginPage> {
                             setState(() {
                               isLoading = false;
                             });
-
+                            _showBasicsFlash(
+                              duration: const Duration(seconds: 3),
+                              message: 'Welcome back!',
+                            );
                             Navigator.push(
                               context,
                               MaterialPageRoute(

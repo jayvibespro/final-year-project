@@ -38,6 +38,8 @@ dev_dependencies:
   get: ^5.0.0-beta.23
   flash: ^2.0.3+2
   image_picker: ^0.8.4+10
+  image_utils_class: ^2.0.0
+
 
 flutter:
 
