@@ -52,7 +52,9 @@ class _CommentsPageState extends State<CommentsPage> {
     final _screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      drawer: _screenWidth < _tabletScreenWidth ? const CustomDrawer(): const SizedBox(),
+      drawer: _screenWidth < _tabletScreenWidth
+          ? const CustomDrawer()
+          : const SizedBox(),
       appBar: BaseAppBar(
         appBar: AppBar(),
       ),
@@ -68,10 +70,12 @@ class _CommentsPageState extends State<CommentsPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.all(32.0),
+                padding: _screenWidth < _tabletScreenWidth
+                    ? const EdgeInsets.all(16.0)
+                    : const EdgeInsets.all(32.0),
                 child: Text(
                   '${widget.postsModel!.post}',
-                  style: TextStyle(fontSize: 20),
+                  style: const TextStyle(fontSize: 20),
                 ),
               ),
               const Divider(),
@@ -99,8 +103,11 @@ class _CommentsPageState extends State<CommentsPage> {
 
                             return InkWell(
                               child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 32),
+                                padding: _screenWidth < _tabletScreenWidth
+                                    ? const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 8)
+                                    : const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 32),
                                 child: Container(
                                   padding: const EdgeInsets.all(16),
                                   child: Column(
@@ -143,7 +150,7 @@ class _CommentsPageState extends State<CommentsPage> {
                                             ],
                                           ),
                                           const Text(
-                                            '12/05/2022, 12:09 PM',
+                                            'May 21',
                                             style: TextStyle(
                                                 color: Colors.black54,
                                                 fontSize: 12),

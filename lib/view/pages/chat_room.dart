@@ -16,7 +16,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:get/get.dart';
 
 import '../../constants/constants_state_values.dart';
 import 'group_chat/group_conversation_page.dart';
@@ -50,7 +49,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   final TextEditingController _userSearchController = TextEditingController();
   final TextEditingController _singleChatMessageController =
       TextEditingController();
-
 
   final FirebaseAuth auth = FirebaseAuth.instance;
 
@@ -231,8 +229,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
       }
     }
   }
-
-
 
   Widget currentWidget() {
     if (isChosenWidget == 0) {

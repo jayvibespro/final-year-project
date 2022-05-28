@@ -19,7 +19,6 @@ class PostsPage extends StatefulWidget {
 }
 
 class _PostsPageState extends State<PostsPage> {
-  bool isHover = false;
   bool isLike = false;
 
   final TextEditingController _postController = TextEditingController();
@@ -60,7 +59,6 @@ class _PostsPageState extends State<PostsPage> {
       rethrow;
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -327,17 +325,14 @@ class _PostsPageState extends State<PostsPage> {
   }
 }
 
-
 class PostsPageForMobile extends StatefulWidget {
-   PostsPageForMobile({Key? key}) : super(key: key);
+  PostsPageForMobile({Key? key}) : super(key: key);
 
   @override
   State<PostsPageForMobile> createState() => _PostsPageForMobileState();
 }
 
 class _PostsPageForMobileState extends State<PostsPageForMobile> {
-   bool isHover = false;
-
   bool isLike = false;
 
   final TextEditingController _postController = TextEditingController();
@@ -417,7 +412,7 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
                           return InkWell(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 32, vertical: 16),
+                                  horizontal: 8, vertical: 4),
                               child: Container(
                                 width: MediaQuery.of(context).size.width,
                                 decoration: BoxDecoration(
@@ -428,7 +423,7 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Padding(
-                                      padding: const EdgeInsets.all(16.0),
+                                      padding: const EdgeInsets.all(8.0),
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -438,12 +433,12 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
                                               Text(
                                                 '${postSnapshot.likes}',
                                                 style: const TextStyle(
-                                                    fontSize: 26,
+                                                    fontSize: 16,
                                                     fontWeight:
                                                         FontWeight.bold),
                                               ),
                                               const SizedBox(
-                                                width: 20,
+                                                width: 8,
                                               ),
                                               IconButton(
                                                 onPressed: () async {
@@ -468,18 +463,17 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
                                             ],
                                           ),
                                           Text('${postSnapshot.ownerName}'),
-                                          const Text('Dodoma Center'),
                                           const Icon(Icons.person)
                                         ],
                                       ),
                                     ),
                                     const Padding(
-                                      padding: EdgeInsets.only(bottom: 16),
+                                      padding: EdgeInsets.only(bottom: 4),
                                       child: Divider(),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                          16, 0, 16, 16),
+                                      padding:
+                                          const EdgeInsets.fromLTRB(4, 0, 4, 4),
                                       child: Text("${postSnapshot.post}"),
                                     ),
                                     Row(
@@ -487,13 +481,13 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
                                           MainAxisAlignment.spaceAround,
                                       children: [
                                         Padding(
-                                          padding: const EdgeInsets.all(16.0),
+                                          padding: const EdgeInsets.all(8.0),
                                           child: Center(
                                             child: Text("${postSnapshot.date}"),
                                           ),
                                         ),
                                         Padding(
-                                          padding: const EdgeInsets.all(16.0),
+                                          padding: const EdgeInsets.all(8.0),
                                           child: Center(
                                             child: Text(
                                                 "Comments: ${postSnapshot.commentCount}"),
@@ -525,7 +519,7 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(32.0),
+              padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
                 onPressed: () {
                   addAdvanceBottomSheets(context);

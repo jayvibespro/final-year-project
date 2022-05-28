@@ -89,7 +89,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final _screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-     drawer: _screenWidth < _tabletScreenWidth ? const CustomDrawer(): const SizedBox(),
+      drawer: const CustomDrawer(),
       appBar: BaseAppBar(
         appBar: AppBar(),
       ),
@@ -178,10 +178,14 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: Divider(),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 32),
+                        padding: _screenWidth <= _tabletScreenWidth
+                            ? const EdgeInsets.all(8)
+                            : const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 32),
                         child: Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: _screenWidth <= _tabletScreenWidth
+                              ? const EdgeInsets.all(8)
+                              : const EdgeInsets.all(16),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [

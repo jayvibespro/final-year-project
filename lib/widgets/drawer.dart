@@ -1,8 +1,9 @@
-import 'package:finalyearproject/constants/constants_state_values.dart';
+import 'package:finalyearproject/view/pages/group_chat/group_conversation_page.dart';
 import 'package:finalyearproject/view/pages/group_chat/start_group.dart';
 import 'package:finalyearproject/view/pages/posts/posts_page.dart';
+import 'package:finalyearproject/view/pages/single_chat/single_chat_conversation_page.dart';
+import 'package:finalyearproject/view/pages/single_chat/start_chat_page.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer({Key? key}) : super(key: key);
@@ -27,13 +28,16 @@ class _CustomDrawerState extends State<CustomDrawer> {
             child: Column(
               children: [
                 const SizedBox(
-                  height: 10,
+                  height: 40,
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
                     onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>  PostsPageForMobile()));
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PostsPageForMobile()));
                     },
                     child: Material(
                       elevation: 2,
@@ -69,9 +73,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
                     onTap: () {
-                      setState(() {
-                        isChosenWidget = 0;
-                      });
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SingleChatConversation()));
                     },
                     child: Material(
                       elevation: 2,
@@ -108,9 +113,11 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
                     onTap: () {
-                      setState(() {
-                        isChosenWidget = 1;
-                      });
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const GroupConversationPage()));
                     },
                     child: Material(
                       elevation: 2,
@@ -149,9 +156,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
                     onTap: () {
-                      setState(() {
-                        isChosenWidget = 2;
-                      });
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const StartChatPage()));
                     },
                     child: Material(
                       elevation: 2,
@@ -188,7 +196,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   padding: const EdgeInsets.all(8.0),
                   child: InkWell(
                     onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=> const StartGroup()));
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const StartGroup()));
                     },
                     child: Material(
                       elevation: 2,

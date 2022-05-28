@@ -89,12 +89,12 @@ class _GroupConversationState extends State<GroupConversationPage> {
                     snapshot.data![index];
                 return Padding(
                   padding:
-                      const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+                      const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8),
                   child: Material(
                     elevation: 1,
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(4),
                       child: ListTile(
                         title: Text('${groupConversationSnapshot.groupName}'),
                         subtitle:

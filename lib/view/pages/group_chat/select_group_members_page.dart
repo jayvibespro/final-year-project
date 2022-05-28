@@ -87,7 +87,9 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.all(32.0),
+                padding: _screenWidth < _tabletScreenWidth
+                    ? const EdgeInsets.all(16.0)
+                    : const EdgeInsets.all(32.0),
                 child: Row(
                   children: [
                     Expanded(
@@ -105,8 +107,8 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
                         ),
                       ),
                     ),
-                    const SizedBox(
-                      width: 20,
+                    SizedBox(
+                      width: _screenWidth < _tabletScreenWidth ? 10 : 20,
                     ),
                     IconButton(
                       onPressed: () {
@@ -175,10 +177,10 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
                 ),
               ),
               SizedBox(
-                height: 120,
+                height: _screenWidth < _tabletScreenWidth ? 80 : 120,
                 child: Padding(
                   padding: const EdgeInsets.only(
-                      left: 8, right: 8, top: 16, bottom: 16),
+                      left: 8, right: 8, top: 16, bottom: 8),
                   child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       physics: const BouncingScrollPhysics(
@@ -233,7 +235,9 @@ class _SelectGroupMembersState extends State<SelectGroupMembers> {
               ),
               const Divider(),
               Padding(
-                padding: const EdgeInsets.all(32.0),
+                padding: _screenWidth < _tabletScreenWidth
+                    ? const EdgeInsets.all(16.0)
+                    : const EdgeInsets.all(32.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [

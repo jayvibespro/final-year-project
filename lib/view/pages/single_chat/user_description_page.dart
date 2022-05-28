@@ -1,15 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:finalyearproject/models/comments_model.dart';
 import 'package:finalyearproject/models/user_model.dart';
-import 'package:finalyearproject/view/pages/chat_room.dart';
-import 'package:finalyearproject/view/pages/login_page.dart';
-import 'package:finalyearproject/view/pages/posts/posts_page.dart';
 import 'package:finalyearproject/widgets/app_bar.dart';
 import 'package:finalyearproject/widgets/drawer.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-import '../profile/profile_page.dart';
 
 class ChatUserDescriptionPage extends StatefulWidget {
   ChatUserDescriptionPage({
@@ -26,8 +20,6 @@ class ChatUserDescriptionPage extends StatefulWidget {
 
 class _ChatUserDescriptionPageState extends State<ChatUserDescriptionPage> {
   bool isHover = false;
-
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final _db = FirebaseFirestore.instance;
 
@@ -55,7 +47,7 @@ class _ChatUserDescriptionPageState extends State<ChatUserDescriptionPage> {
     final _screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      drawer: _screenWidth < _tabletScreenWidth ? const CustomDrawer(): const SizedBox(),
+      drawer: const CustomDrawer(),
       appBar: BaseAppBar(
         appBar: AppBar(),
       ),
@@ -114,8 +106,10 @@ class _ChatUserDescriptionPageState extends State<ChatUserDescriptionPage> {
                           child: Divider(),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 32),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal:
+                                  _screenWidth < _tabletScreenWidth ? 8 : 32),
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             child: Row(
@@ -135,8 +129,10 @@ class _ChatUserDescriptionPageState extends State<ChatUserDescriptionPage> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 32),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal:
+                                  _screenWidth < _tabletScreenWidth ? 8 : 32),
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             child: Row(
@@ -156,8 +152,10 @@ class _ChatUserDescriptionPageState extends State<ChatUserDescriptionPage> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 32),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal:
+                                  _screenWidth < _tabletScreenWidth ? 8 : 32),
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             child: Row(
@@ -177,8 +175,10 @@ class _ChatUserDescriptionPageState extends State<ChatUserDescriptionPage> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 32),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal:
+                                  _screenWidth < _tabletScreenWidth ? 8 : 32),
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             child: Row(
@@ -198,8 +198,10 @@ class _ChatUserDescriptionPageState extends State<ChatUserDescriptionPage> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 32),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal:
+                                  _screenWidth < _tabletScreenWidth ? 8 : 32),
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             child: Row(
@@ -219,8 +221,10 @@ class _ChatUserDescriptionPageState extends State<ChatUserDescriptionPage> {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 32),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal:
+                                  _screenWidth < _tabletScreenWidth ? 8 : 32),
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             child: Row(
@@ -272,10 +276,6 @@ class CommentUserDescriptionPage extends StatefulWidget {
 
 class _CommentUserDescriptionPageState
     extends State<CommentUserDescriptionPage> {
-  bool isHover = false;
-
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
   final _db = FirebaseFirestore.instance;
 
   Stream<List<UserModel>> userDetailsStream() {
@@ -298,143 +298,18 @@ class _CommentUserDescriptionPageState
 
   @override
   Widget build(BuildContext context) {
+    final _screenWidth = MediaQuery.of(context).size.width;
+    const _tabletScreenWidth = 768;
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: Row(
-          children: const [
-            Icon(
-              Icons.person,
-              color: Colors.black,
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            Text(
-              "Save the future",
-              style: TextStyle(color: Colors.black),
-            ),
-          ],
-        ),
-        actions: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 600),
-            child: InkWell(
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          const PostsPage(title: 'Save the Future')),
-                );
-              },
-              onHover: (value) {
-                setState(() {
-                  isHover = value;
-                });
-              },
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'Home',
-                    style: TextStyle(
-                        color: Colors.black, fontSize: (isHover) ? 16 : 14),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {},
-            child: const Text('About us'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => ChatRoomPage()),
-              );
-            },
-            child: const Text('Chatroom'),
-          ),
-          TextButton(
-            onPressed: () {},
-            child: const Text('Stories'),
-          ),
-          TextButton(
-            onPressed: () {},
-            child: const Text('Reports'),
-          ),
-          TextButton(
-            onPressed: () {},
-            child: const Text('Challenges'),
-          ),
-          TextButton(
-            onPressed: () {},
-            child: const Text('Discover'),
-          ),
-          const SizedBox(
-            width: 100,
-          ),
-          PopupMenuButton(
-            color: Colors.white,
-            icon: const Icon(
-              Icons.person,
-              color: Colors.black,
-            ),
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                child: Center(
-                  child: Icon(
-                    Icons.person,
-                    color: Colors.black,
-                  ),
-                ),
-                value: 1,
-              ),
-              const PopupMenuItem(
-                child: Center(child: Text("Sarah Thomas")),
-                value: 2,
-              ),
-              const PopupMenuItem(
-                child: Divider(),
-                value: 3,
-              ),
-              PopupMenuItem(
-                child: GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const ProfilePage()));
-                    },
-                    child: const Center(child: Text("Profile"))),
-                value: 4,
-              ),
-              const PopupMenuItem(
-                child: Center(child: Text("Settings")),
-                value: 5,
-              ),
-              PopupMenuItem(
-                child: GestureDetector(
-                    onTap: () {
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => LoginPage()),
-                          (route) => false);
-                    },
-                    child: const Center(child: Text("LogOut"))),
-                value: 6,
-              ),
-            ],
-          ),
-        ],
-        backgroundColor: Colors.white,
+      drawer: const CustomDrawer(),
+      appBar: BaseAppBar(
+        appBar: AppBar(),
       ),
       backgroundColor: const Color(0xFFF2F3F4),
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 300),
+        padding: _screenWidth < _tabletScreenWidth
+            ? const EdgeInsets.all(0)
+            : const EdgeInsets.symmetric(vertical: 0, horizontal: 300),
         child: Container(
           width: double.infinity,
           color: Colors.grey[50],
@@ -485,8 +360,10 @@ class _CommentUserDescriptionPageState
                           child: Divider(),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 32),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal:
+                                  _screenWidth < _tabletScreenWidth ? 8 : 32),
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             child: Row(
@@ -506,8 +383,10 @@ class _CommentUserDescriptionPageState
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 32),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal:
+                                  _screenWidth < _tabletScreenWidth ? 8 : 32),
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             child: Row(
@@ -527,8 +406,10 @@ class _CommentUserDescriptionPageState
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 32),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal:
+                                  _screenWidth < _tabletScreenWidth ? 8 : 32),
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             child: Row(
@@ -548,8 +429,10 @@ class _CommentUserDescriptionPageState
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 32),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal:
+                                  _screenWidth < _tabletScreenWidth ? 8 : 32),
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             child: Row(
@@ -569,8 +452,10 @@ class _CommentUserDescriptionPageState
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 32),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal:
+                                  _screenWidth < _tabletScreenWidth ? 8 : 32),
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             child: Row(
@@ -590,8 +475,10 @@ class _CommentUserDescriptionPageState
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 32),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 8.0,
+                              horizontal:
+                                  _screenWidth < _tabletScreenWidth ? 8 : 32),
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             child: Row(
