@@ -62,6 +62,8 @@ class _PostsPageState extends State<PostsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final _screenSize = MediaQuery.of(context).size.width;
+    const _tabletScreenSize = 768;
     return Scaffold(
       backgroundColor: const Color(0xFFF2F3F4),
       body: Container(
@@ -93,8 +95,10 @@ class _PostsPageState extends State<PostsPage> {
 
                           return InkWell(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 32, vertical: 16),
+                              padding: _screenSize < _tabletScreenSize
+                                  ? const EdgeInsets.all(8)
+                                  : const EdgeInsets.symmetric(
+                                      horizontal: 32, vertical: 16),
                               child: Container(
                                 width: MediaQuery.of(context).size.width,
                                 decoration: BoxDecoration(
@@ -105,7 +109,9 @@ class _PostsPageState extends State<PostsPage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Padding(
-                                      padding: const EdgeInsets.all(16.0),
+                                      padding: _screenSize < _tabletScreenSize
+                                          ? const EdgeInsets.all(8.0)
+                                          : const EdgeInsets.all(16.0),
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -114,13 +120,19 @@ class _PostsPageState extends State<PostsPage> {
                                             children: [
                                               Text(
                                                 '${postSnapshot.likes}',
-                                                style: const TextStyle(
-                                                    fontSize: 26,
+                                                style: TextStyle(
+                                                    fontSize: _screenSize <
+                                                            _tabletScreenSize
+                                                        ? 16
+                                                        : 26,
                                                     fontWeight:
                                                         FontWeight.bold),
                                               ),
-                                              const SizedBox(
-                                                width: 20,
+                                              SizedBox(
+                                                width: _screenSize <
+                                                        _tabletScreenSize
+                                                    ? 10
+                                                    : 20,
                                               ),
                                               IconButton(
                                                 onPressed: () async {
@@ -145,18 +157,19 @@ class _PostsPageState extends State<PostsPage> {
                                             ],
                                           ),
                                           Text('${postSnapshot.ownerName}'),
-                                          const Text('Dodoma Center'),
                                           const Icon(Icons.person)
                                         ],
                                       ),
                                     ),
                                     const Padding(
-                                      padding: EdgeInsets.only(bottom: 16),
+                                      padding: EdgeInsets.only(bottom: 8),
                                       child: Divider(),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                          16, 0, 16, 16),
+                                      padding: _screenSize < _tabletScreenSize
+                                          ? const EdgeInsets.all(8)
+                                          : const EdgeInsets.fromLTRB(
+                                              16, 0, 16, 16),
                                       child: Text("${postSnapshot.post}"),
                                     ),
                                     Row(
@@ -378,6 +391,8 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
 
   @override
   Widget build(BuildContext context) {
+    final _screenWidth = MediaQuery.of(context).size.width;
+    const _tabletScreenWidth = 768;
     return Scaffold(
       drawer: const CustomDrawer(),
       appBar: BaseAppBar(appBar: AppBar()),
@@ -411,8 +426,10 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
 
                           return InkWell(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
+                              padding: _screenWidth <= _tabletScreenWidth
+                                  ? const EdgeInsets.all(4)
+                                  : const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
                               child: Container(
                                 width: MediaQuery.of(context).size.width,
                                 decoration: BoxDecoration(
