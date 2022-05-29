@@ -1,5 +1,6 @@
 import 'package:finalyearproject/view/pages/chat_room.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
+import 'package:finalyearproject/view/sign_in_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -51,8 +52,8 @@ class MainPage extends StatelessWidget {
           if (snapshot.hasData) {
             return ChatRoomPage();
           } else {
-            return _screenSizeWidth < _tabletScreenWidth
-                ? MobileLoginPage()
+            return _screenSizeWidth <= _tabletScreenWidth
+                ? const SignInScreen()
                 : LoginPage();
           }
         },

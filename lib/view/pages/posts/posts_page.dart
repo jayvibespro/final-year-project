@@ -143,6 +143,8 @@ class _PostsPageState extends State<PostsPage> {
                                                           id: postSnapshot.id,
                                                           like: postSnapshot
                                                               .likes,
+                                                          likers: postSnapshot
+                                                              .likers,
                                                           userId: auth
                                                               .currentUser!.uid)
                                                       .addLike();
@@ -466,6 +468,8 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
                                                           id: postSnapshot.id,
                                                           like: postSnapshot
                                                               .likes,
+                                                          likers: postSnapshot
+                                                              .likers,
                                                           userId: auth
                                                               .currentUser!.uid)
                                                       .addLike();

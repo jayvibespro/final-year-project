@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finalyearproject/constants/constants_state_values.dart';
 import 'package:finalyearproject/models/group_chat_model.dart';
 import 'package:finalyearproject/models/selected_members.dart';
 import 'package:finalyearproject/models/single_chat_model.dart';
 import 'package:finalyearproject/models/user_model.dart';
 import 'package:finalyearproject/services/single_chat_services.dart';
+import 'package:finalyearproject/view/pages/group_chat/group_chat_page.dart';
 import 'package:finalyearproject/view/pages/group_chat/select_group_members_page.dart';
 import 'package:finalyearproject/view/pages/posts/posts_page.dart';
 import 'package:finalyearproject/view/pages/single_chat/single_chat_page.dart';
@@ -16,9 +18,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-
-import '../../constants/constants_state_values.dart';
-import 'group_chat/group_conversation_page.dart';
 
 class ChatRoomPage extends StatefulWidget {
   @override
@@ -295,7 +294,66 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         },
       );
     } else if (isChosenWidget == 1) {
-      return const GroupConversationPage();
+      return StreamBuilder<List<GroupChatConversationModel>>(
+        stream: groupChatConversationStream(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(
+              child: Text('No data Loaded...'),
+            );
+          } else if (snapshot.hasError) {
+            return const Center(
+              child: Text('An Error Occurred...'),
+            );
+          } else if (snapshot.hasData) {
+            return ListView.builder(
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
+                itemCount: snapshot.data!.length,
+                itemBuilder: (context, index) {
+                  GroupChatConversationModel? groupConversationSnapshot =
+                      snapshot.data![index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 4.0, horizontal: 8),
+                    child: Material(
+                      elevation: 1,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        child: ListTile(
+                          title: Text('${groupConversationSnapshot.groupName}'),
+                          subtitle:
+                              Text('${groupConversationSnapshot.lastMessage}'),
+                          leading: const Icon(Icons.group),
+                          trailing:
+                              Text('${groupConversationSnapshot.lastDate}'),
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => GroupChatPage(
+                                          groupChatConversationModel:
+                                              groupConversationSnapshot,
+                                        )));
+                          },
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  );
+                });
+          } else {
+            return const Center(
+              child: Text('An Error Occurred...'),
+            );
+          }
+        },
+      );
     } else if (isChosenWidget == 2) {
       return Container(
         color: const Color(0xFFF4F6F7),

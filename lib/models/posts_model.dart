@@ -8,8 +8,10 @@ class PostsModel {
   String ownerName;
   String ownerId;
   String date;
+  List likers;
 
   PostsModel({
+    required this.likers,
     required this.id,
     required this.commentCount,
     required this.post,
@@ -26,6 +28,7 @@ class PostsModel {
       commentCount: doc.data()!['comment_count'],
       post: doc.data()!['post'],
       likes: doc.data()!['likes'],
+      likers: doc.data()!['likers'],
       ownerId: doc.data()!['owner_id'],
       ownerName: doc.data()!['owner_name'],
       date: doc.data()!['date'],

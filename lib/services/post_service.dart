@@ -5,12 +5,14 @@ class PostService {
   String? post;
   String? id;
   int? likes;
+  List? likers;
   int? commentCount;
   String? ownerName;
   String? ownerId;
   String? date;
 
   PostService({
+    this.likers,
     this.commentCount,
     this.id,
     this.post,
@@ -28,6 +30,7 @@ class PostService {
           await FirebaseFirestore.instance.collection('posts').add({
         'post': post,
         'likes': likes,
+        'likers': [],
         'comment_count': commentCount,
         'owner_id': _auth.currentUser?.uid,
         'owner_name': _auth.currentUser?.email,

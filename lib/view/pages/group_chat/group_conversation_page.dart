@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:finalyearproject/models/group_chat_model.dart';
 import 'package:finalyearproject/view/pages/group_chat/group_chat_page.dart';
+import 'package:finalyearproject/widgets/app_bar.dart';
+import 'package:finalyearproject/widgets/drawer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -67,64 +69,69 @@ class _GroupConversationState extends State<GroupConversationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<GroupChatConversationModel>>(
-      stream: groupChatConversationStream(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(
-            child: Text('No data Loaded...'),
-          );
-        } else if (snapshot.hasError) {
-          return const Center(
-            child: Text('An Error Occurred...'),
-          );
-        } else if (snapshot.hasData) {
-          return ListView.builder(
-              physics: const BouncingScrollPhysics(
-                parent: AlwaysScrollableScrollPhysics(),
-              ),
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                GroupChatConversationModel? groupConversationSnapshot =
-                    snapshot.data![index];
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8),
-                  child: Material(
-                    elevation: 1,
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      child: ListTile(
-                        title: Text('${groupConversationSnapshot.groupName}'),
-                        subtitle:
-                            Text('${groupConversationSnapshot.lastMessage}'),
-                        leading: const Icon(Icons.group),
-                        trailing: Text('${groupConversationSnapshot.lastDate}'),
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => GroupChatPage(
-                                        groupChatConversationModel:
-                                            groupConversationSnapshot,
-                                      )));
-                        },
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[50],
-                        borderRadius: BorderRadius.circular(12),
+    return Scaffold(
+      appBar: BaseAppBar(appBar: AppBar()),
+      drawer: const CustomDrawer(),
+      body: StreamBuilder<List<GroupChatConversationModel>>(
+        stream: groupChatConversationStream(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(
+              child: Text('No data Loaded...'),
+            );
+          } else if (snapshot.hasError) {
+            return const Center(
+              child: Text('An Error Occurred...'),
+            );
+          } else if (snapshot.hasData) {
+            return ListView.builder(
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
+                itemCount: snapshot.data!.length,
+                itemBuilder: (context, index) {
+                  GroupChatConversationModel? groupConversationSnapshot =
+                      snapshot.data![index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 4.0, horizontal: 8),
+                    child: Material(
+                      elevation: 1,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        child: ListTile(
+                          title: Text('${groupConversationSnapshot.groupName}'),
+                          subtitle:
+                              Text('${groupConversationSnapshot.lastMessage}'),
+                          leading: const Icon(Icons.group),
+                          trailing:
+                              Text('${groupConversationSnapshot.lastDate}'),
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => GroupChatPage(
+                                          groupChatConversationModel:
+                                              groupConversationSnapshot,
+                                        )));
+                          },
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
-                  ),
-                );
-              });
-        } else {
-          return const Center(
-            child: Text('An Error Occurred...'),
-          );
-        }
-      },
+                  );
+                });
+          } else {
+            return const Center(
+              child: Text('An Error Occurred...'),
+            );
+          }
+        },
+      ),
     );
   }
 }
