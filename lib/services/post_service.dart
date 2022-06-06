@@ -31,6 +31,7 @@ class PostService {
         'post': post,
         'likes': likes,
         'likers': [],
+        'timestamp': FieldValue.serverTimestamp(),
         'comment_count': commentCount,
         'owner_id': _auth.currentUser?.uid,
         'owner_name': _auth.currentUser?.email,

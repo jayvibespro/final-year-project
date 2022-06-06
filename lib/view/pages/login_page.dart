@@ -1,6 +1,6 @@
 import 'package:finalyearproject/services/auth_services.dart';
 import 'package:finalyearproject/view/pages/chat_room.dart';
-import 'package:finalyearproject/view/sign_up_screen.dart';
+import 'package:finalyearproject/view/pages/registration_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flash/flash.dart';
 import 'package:flutter/material.dart';
@@ -23,13 +23,12 @@ class _LoginPageState extends State<LoginPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   void _showBasicsFlash({
-    Duration? duration,
     flashStyle = FlashBehavior.floating,
     String? message,
   }) {
     showFlash(
       context: context,
-      duration: duration,
+      duration: const Duration(seconds: 4),
       builder: (context, controller) {
         return Padding(
           padding: const EdgeInsets.all(32.0),
@@ -40,7 +39,9 @@ class _LoginPageState extends State<LoginPage> {
             boxShadows: kElevationToShadow[1],
             borderRadius: BorderRadius.circular(12),
             backgroundColor: Colors.grey[50],
-            margin: const EdgeInsets.symmetric(horizontal: 300),
+            margin: MediaQuery.of(context).size.width <= 768
+                ? const EdgeInsets.symmetric(horizontal: 0)
+                : const EdgeInsets.symmetric(horizontal: 300),
             horizontalDismissDirection: HorizontalDismissDirection.horizontal,
             child: FlashBar(
               content: Center(child: Text(message!)),
@@ -230,38 +231,41 @@ class _LoginPageState extends State<LoginPage> {
                                     email: _emailController.text,
                                     password: _passwordController.text)
                                 .login();
+
+                            await Future.delayed(const Duration(seconds: 3));
+
+                            if (auth.currentUser != null) {
+                              setState(() {
+                                isLoading = false;
+                              });
+                              _showBasicsFlash(
+                                message: 'Welcome back!',
+                              );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ChatRoomPage()),
+                              );
+
+                              _showBasicsFlash(
+                                message: 'Welcome back!',
+                              );
+                            } else {
+                              _showBasicsFlash(
+                                message: 'User not found. Please try again.',
+                              );
+                              setState(() {
+                                isLoading = false;
+                              });
+                            }
                           } else {
                             _showBasicsFlash(
-                              duration: const Duration(seconds: 3),
                               message:
                                   'Make sure you fill all the credentials and try again.',
                             );
                             setState(() {
                               isLoading = false;
                             });
-                          }
-                          await Future.delayed(const Duration(seconds: 2));
-
-                          if (auth.currentUser != null) {
-                            setState(() {
-                              isLoading = false;
-                            });
-                            _showBasicsFlash(
-                              duration: const Duration(seconds: 3),
-                              message: 'Welcome back!',
-                            );
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ChatRoomPage()),
-                            );
-
-                            _showBasicsFlash(
-                              duration: const Duration(seconds: 3),
-                              message: 'Welcome back!',
-                            );
-                          } else {
-                            return;
                           }
                         },
                         child: Padding(
@@ -295,7 +299,7 @@ class _LoginPageState extends State<LoginPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const SignUpScreen()),
+                                  builder: (context) => RegistrationPage()),
                             );
                           },
                           child: const Text(

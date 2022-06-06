@@ -34,27 +34,10 @@ class AuthServices {
 
   register() async {
     try {
-      UserCredential userCredential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      return await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email!,
         password: password!,
       );
-
-      FirebaseAuth _auth = FirebaseAuth.instance;
-
-      var user = FirebaseFirestore.instance.collection('users').add({
-        'name': name,
-        'email': _auth.currentUser?.email,
-        'user_id': _auth.currentUser?.uid,
-        'gender': '',
-        'region': '',
-        'phone': '',
-        'profession': '',
-        'facility': '',
-        'id_number': '',
-        'account_type': accountType,
-        'avatar_url': '',
-      });
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         print('The password provided is too weak.');

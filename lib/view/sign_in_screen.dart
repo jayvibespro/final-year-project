@@ -30,7 +30,7 @@ class _SignInScreenState extends State<SignInScreen> {
       duration: duration,
       builder: (context, controller) {
         return Padding(
-          padding: const EdgeInsets.all(32.0),
+          padding: const EdgeInsets.all(16.0),
           child: Flash(
             controller: controller,
             behavior: flashStyle,
@@ -38,7 +38,7 @@ class _SignInScreenState extends State<SignInScreen> {
             boxShadows: kElevationToShadow[1],
             borderRadius: BorderRadius.circular(12),
             backgroundColor: Colors.grey[50],
-            margin: const EdgeInsets.symmetric(horizontal: 300),
+            margin: const EdgeInsets.symmetric(horizontal: 0),
             horizontalDismissDirection: HorizontalDismissDirection.horizontal,
             child: FlashBar(
               content: Center(child: Text(message!)),
@@ -109,6 +109,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
                       controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
                       decoration: const InputDecoration(
                         prefixIcon: Icon(Icons.mail_outline_outlined),
                         hintText: "    Email",
@@ -137,6 +138,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
                       controller: _passwordController,
+                      obscureText: true,
+                      keyboardType: TextInputType.visiblePassword,
                       decoration: const InputDecoration(
                         prefixIcon: Icon(Icons.key),
                         hintText: "    Password",
@@ -168,37 +171,44 @@ class _SignInScreenState extends State<SignInScreen> {
                             email: _emailController.text,
                             password: _passwordController.text)
                         .login();
+
+                    await Future.delayed(const Duration(seconds: 3));
+
+                    if (auth.currentUser != null) {
+                      setState(() {
+                        isLoading = false;
+                      });
+                      _showBasicsFlash(
+                        duration: const Duration(seconds: 4),
+                        message: 'Welcome back!',
+                      );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ChatRoomPage()),
+                      );
+
+                      _showBasicsFlash(
+                        duration: const Duration(seconds: 4),
+                        message: 'Welcome back!',
+                      );
+                    } else {
+                      _showBasicsFlash(
+                        duration: const Duration(seconds: 4),
+                        message: 'User not found. Please try again.',
+                      );
+                      setState(() {
+                        isLoading = false;
+                      });
+                    }
                   } else {
                     _showBasicsFlash(
-                      duration: const Duration(seconds: 3),
+                      duration: const Duration(seconds: 4),
                       message:
-                          'Make sure you fill all the credentials and try again.',
+                          'Make sure you fill the right credentials and try again.',
                     );
                     setState(() {
                       isLoading = false;
                     });
-                  }
-                  await Future.delayed(const Duration(seconds: 2));
-
-                  if (auth.currentUser != null) {
-                    setState(() {
-                      isLoading = false;
-                    });
-                    _showBasicsFlash(
-                      duration: const Duration(seconds: 3),
-                      message: 'Welcome back!',
-                    );
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ChatRoomPage()),
-                    );
-
-                    _showBasicsFlash(
-                      duration: const Duration(seconds: 3),
-                      message: 'Welcome back!',
-                    );
-                  } else {
-                    return;
                   }
                 },
                 child: Material(
@@ -232,7 +242,7 @@ class _SignInScreenState extends State<SignInScreen> {
             Expanded(
               child: Center(
                 child: Text(
-                  'Or',
+                  '____Or____',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.5),
                     fontWeight: FontWeight.bold,

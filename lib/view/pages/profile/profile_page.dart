@@ -183,9 +183,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             : const EdgeInsets.symmetric(
                                 vertical: 8.0, horizontal: 32),
                         child: Container(
-                          padding: _screenWidth <= _tabletScreenWidth
-                              ? const EdgeInsets.all(8)
-                              : const EdgeInsets.all(16),
+                          padding:const EdgeInsets.all(16),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -203,7 +201,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
+                        padding: _screenWidth <= _tabletScreenWidth
+                            ? const EdgeInsets.all(8)
+                            : const EdgeInsets.symmetric(
                             vertical: 8.0, horizontal: 32),
                         child: Container(
                           padding: const EdgeInsets.all(16),
@@ -224,7 +224,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
+                        padding: _screenWidth <= _tabletScreenWidth
+                            ? const EdgeInsets.all(8)
+                            : const EdgeInsets.symmetric(
                             vertical: 8.0, horizontal: 32),
                         child: Container(
                           padding: const EdgeInsets.all(16),
@@ -245,7 +247,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
+                        padding: _screenWidth <= _tabletScreenWidth
+                            ? const EdgeInsets.all(8)
+                            : const EdgeInsets.symmetric(
                             vertical: 8.0, horizontal: 32),
                         child: Container(
                           padding: const EdgeInsets.all(16),
@@ -266,7 +270,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
+                        padding: _screenWidth <= _tabletScreenWidth
+                            ? const EdgeInsets.all(8)
+                            : const EdgeInsets.symmetric(
                             vertical: 8.0, horizontal: 32),
                         child: Container(
                           padding: const EdgeInsets.all(16),
@@ -287,7 +293,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
+                        padding: _screenWidth <= _tabletScreenWidth
+                            ? const EdgeInsets.all(8)
+                            : const EdgeInsets.symmetric(
                             vertical: 8.0, horizontal: 32),
                         child: Container(
                           padding: const EdgeInsets.all(16),
@@ -308,7 +316,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
+                        padding: _screenWidth <= _tabletScreenWidth
+                            ? const EdgeInsets.all(8)
+                            : const EdgeInsets.symmetric(
                             vertical: 8.0, horizontal: 32),
                         child: Container(
                           padding: const EdgeInsets.all(16),

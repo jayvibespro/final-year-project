@@ -1,7 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:finalyearproject/models/user_model.dart';
 import 'package:finalyearproject/services/auth_services.dart';
 import 'package:finalyearproject/view/pages/chat_room.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
 import 'package:finalyearproject/view/pages/profile/profile_page.dart';
+import 'package:finalyearproject/view/sign_in_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class BaseAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -25,6 +29,27 @@ class BaseAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _BaseAppBarState extends State<BaseAppBar> {
   String dropdownValue = 'Home';
+
+  final _db = FirebaseFirestore.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  Stream<List<UserModel>> userStream() {
+    try {
+      return _db
+          .collection("users")
+          .where('user_id', isEqualTo: auth.currentUser!.uid)
+          .snapshots()
+          .map((element) {
+        final List<UserModel> dataFromFireStore = <UserModel>[];
+        for (final DocumentSnapshot<Map<String, dynamic>> doc in element.docs) {
+          dataFromFireStore.add(UserModel.fromDocumentSnapshot(doc: doc));
+        }
+        return dataFromFireStore;
+      });
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -186,9 +211,34 @@ class _BaseAppBarState extends State<BaseAppBar> {
               ),
               value: 1,
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               child: Center(
-                child: Text("Sarah Thomas"),
+                child: StreamBuilder<List<UserModel>>(
+                  stream: userStream(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (snapshot.hasError) {
+                      return const Center(
+                        child: Text('An Error Occurred...'),
+                      );
+                    } else if (snapshot.hasData) {
+                      var userSnapshot = snapshot.data!;
+                      String name = '';
+                      userSnapshot.forEach((element) {
+                        name = element.name;
+                      });
+
+                      return Text('${name}');
+                    } else {
+                      return const Center(
+                        child: Text('An Error Occurred...'),
+                      );
+                    }
+                  },
+                ),
               ),
               value: 2,
             ),
@@ -205,7 +255,7 @@ class _BaseAppBarState extends State<BaseAppBar> {
                           builder: (context) => const ProfilePage()));
                 },
                 child: const Center(
-                  child: Text("Profile"),
+                  child: Text('Profile'),
                 ),
               ),
               value: 4,
@@ -224,7 +274,7 @@ class _BaseAppBarState extends State<BaseAppBar> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => _screenWidth < _tabletScreen
-                                ? MobileLoginPage()
+                                ? const SignInScreen()
                                 : LoginPage()),
                         (route) => false);
                   },

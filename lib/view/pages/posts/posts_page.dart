@@ -20,6 +20,7 @@ class PostsPage extends StatefulWidget {
 
 class _PostsPageState extends State<PostsPage> {
   bool isLike = false;
+  List likers = [];
 
   final TextEditingController _postController = TextEditingController();
   final _db = FirebaseFirestore.instance;
@@ -29,7 +30,7 @@ class _PostsPageState extends State<PostsPage> {
     try {
       return _db
           .collection("posts")
-          // .orderBy('timestamp', descending: true)
+          .orderBy('timestamp', descending: true)
           .snapshots()
           .map((element) {
         final List<PostsModel> dataFromFireStore = <PostsModel>[];
@@ -39,16 +40,11 @@ class _PostsPageState extends State<PostsPage> {
           _db
               .collection('posts')
               .doc(PostsModel.fromDocumentSnapshot(doc: doc).id)
-              .collection('likers')
-              .where('user_id', isEqualTo: auth.currentUser?.uid)
               .get()
               .then((value) {
-            value.docs.forEach((element) {
-              if (element.data()['value'] == true) {
-                isLike = true;
-              } else {
-                isLike = false;
-              }
+            value.data()!['likers'].forEach((element) {
+              likers
+                  .add({PostsModel.fromDocumentSnapshot(doc: doc).id: element});
             });
           });
         }
@@ -94,109 +90,6 @@ class _PostsPageState extends State<PostsPage> {
                           PostsModel postSnapshot = snapshot.data![index];
 
                           return InkWell(
-                            child: Padding(
-                              padding: _screenSize < _tabletScreenSize
-                                  ? const EdgeInsets.all(8)
-                                  : const EdgeInsets.symmetric(
-                                      horizontal: 32, vertical: 16),
-                              child: Container(
-                                width: MediaQuery.of(context).size.width,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: const Color(0xFFF7F9F9),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: _screenSize < _tabletScreenSize
-                                          ? const EdgeInsets.all(8.0)
-                                          : const EdgeInsets.all(16.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Text(
-                                                '${postSnapshot.likes}',
-                                                style: TextStyle(
-                                                    fontSize: _screenSize <
-                                                            _tabletScreenSize
-                                                        ? 16
-                                                        : 26,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                              SizedBox(
-                                                width: _screenSize <
-                                                        _tabletScreenSize
-                                                    ? 10
-                                                    : 20,
-                                              ),
-                                              IconButton(
-                                                onPressed: () async {
-                                                  setState(() {
-                                                    isLike = !isLike;
-                                                  });
-                                                  LikeServices(
-                                                          id: postSnapshot.id,
-                                                          like: postSnapshot
-                                                              .likes,
-                                                          likers: postSnapshot
-                                                              .likers,
-                                                          userId: auth
-                                                              .currentUser!.uid)
-                                                      .addLike();
-                                                },
-                                                icon: Icon(
-                                                  isLike
-                                                      ? Icons.favorite
-                                                      : Icons.favorite_border,
-                                                  color: Colors.red,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Text('${postSnapshot.ownerName}'),
-                                          const Icon(Icons.person)
-                                        ],
-                                      ),
-                                    ),
-                                    const Padding(
-                                      padding: EdgeInsets.only(bottom: 8),
-                                      child: Divider(),
-                                    ),
-                                    Padding(
-                                      padding: _screenSize < _tabletScreenSize
-                                          ? const EdgeInsets.all(8)
-                                          : const EdgeInsets.fromLTRB(
-                                              16, 0, 16, 16),
-                                      child: Text("${postSnapshot.post}"),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: Center(
-                                            child: Text("${postSnapshot.date}"),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: Center(
-                                            child: Text(
-                                                "Comments: ${postSnapshot.commentCount}"),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -206,6 +99,135 @@ class _PostsPageState extends State<PostsPage> {
                                         )),
                               );
                             },
+                            child: Padding(
+                              padding: _screenSize < _tabletScreenSize
+                                  ? const EdgeInsets.all(8)
+                                  : const EdgeInsets.symmetric(
+                                      horizontal: 32, vertical: 16),
+                              child: Material(
+                                elevation: 3,
+                                borderRadius: BorderRadius.circular(20),
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: const Color(0xFFF7F9F9),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: _screenSize < _tabletScreenSize
+                                            ? const EdgeInsets.all(8.0)
+                                            : const EdgeInsets.all(16.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  '${postSnapshot.likes}',
+                                                  style: TextStyle(
+                                                      fontSize: _screenSize <
+                                                              _tabletScreenSize
+                                                          ? 16
+                                                          : 26,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                SizedBox(
+                                                  width: _screenSize <
+                                                          _tabletScreenSize
+                                                      ? 10
+                                                      : 20,
+                                                ),
+                                                IconButton(
+                                                  onPressed: () async {
+                                                    setState(() {
+                                                      isLike = !isLike;
+                                                    });
+                                                    LikeServices(
+                                                            id: postSnapshot.id,
+                                                            like: postSnapshot
+                                                                .likes,
+                                                            context: context,
+                                                            userId: auth
+                                                                .currentUser!
+                                                                .uid)
+                                                        .addLike();
+                                                  },
+                                                  icon: Icon(
+                                                    likers.contains({
+                                                      postSnapshot.id:
+                                                          auth.currentUser!.uid
+                                                    })
+                                                        ? Icons.favorite
+                                                        : Icons.favorite_border,
+                                                    color: Colors.red,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const Expanded(child: SizedBox()),
+                                            Text(
+                                              '${postSnapshot.ownerName}',
+                                              style: const TextStyle(
+                                                  color: Colors.black54),
+                                            ),
+                                            const SizedBox(
+                                              width: 10,
+                                            ),
+                                            const Icon(Icons.person)
+                                          ],
+                                        ),
+                                      ),
+                                      const Padding(
+                                        padding: EdgeInsets.only(bottom: 8),
+                                        child: Divider(),
+                                      ),
+                                      Padding(
+                                        padding: _screenSize < _tabletScreenSize
+                                            ? const EdgeInsets.all(8)
+                                            : const EdgeInsets.fromLTRB(
+                                                16, 0, 16, 16),
+                                        child: Text(
+                                          "${postSnapshot.post}",
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(16.0),
+                                            child: Center(
+                                              child: Text(
+                                                "${postSnapshot.date}",
+                                                style: const TextStyle(
+                                                    color: Colors.black54),
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(16.0),
+                                            child: Center(
+                                              child: Text(
+                                                "Comments: ${postSnapshot.commentCount}",
+                                                style: const TextStyle(
+                                                    color: Colors.black54),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                           );
                         });
                   } else {
@@ -350,6 +372,8 @@ class PostsPageForMobile extends StatefulWidget {
 class _PostsPageForMobileState extends State<PostsPageForMobile> {
   bool isLike = false;
 
+  List likers = [];
+
   final TextEditingController _postController = TextEditingController();
 
   final _db = FirebaseFirestore.instance;
@@ -360,7 +384,7 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
     try {
       return _db
           .collection("posts")
-          // .orderBy('timestamp', descending: true)
+          .orderBy('timestamp', descending: true)
           .snapshots()
           .map((element) {
         final List<PostsModel> dataFromFireStore = <PostsModel>[];
@@ -370,16 +394,11 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
           _db
               .collection('posts')
               .doc(PostsModel.fromDocumentSnapshot(doc: doc).id)
-              .collection('likers')
-              .where('user_id', isEqualTo: auth.currentUser?.uid)
               .get()
               .then((value) {
-            value.docs.forEach((element) {
-              if (element.data()['value'] == true) {
-                isLike = true;
-              } else {
-                isLike = false;
-              }
+            value.data()!['likers'].forEach((element) {
+              likers
+                  .add({PostsModel.fromDocumentSnapshot(doc: doc).id: element});
             });
           });
         }
@@ -427,96 +446,111 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
                           PostsModel postSnapshot = snapshot.data![index];
 
                           return InkWell(
-                            child: Padding(
-                              padding: _screenWidth <= _tabletScreenWidth
-                                  ? const EdgeInsets.all(4)
-                                  : const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                              child: Container(
-                                width: MediaQuery.of(context).size.width,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color: const Color(0xFFF7F9F9),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Text(
-                                                '${postSnapshot.likes}',
-                                                style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                              const SizedBox(
-                                                width: 8,
-                                              ),
-                                              IconButton(
-                                                onPressed: () async {
-                                                  setState(() {
-                                                    isLike = !isLike;
-                                                  });
-                                                  LikeServices(
-                                                          id: postSnapshot.id,
-                                                          like: postSnapshot
-                                                              .likes,
-                                                          likers: postSnapshot
-                                                              .likers,
-                                                          userId: auth
-                                                              .currentUser!.uid)
-                                                      .addLike();
-                                                },
-                                                icon: Icon(
-                                                  isLike
-                                                      ? Icons.favorite
-                                                      : Icons.favorite_border,
-                                                  color: Colors.red,
+                            child: Material(
+                              elevation: 3,
+                              borderRadius: BorderRadius.circular(20),
+                              child: Padding(
+                                padding: _screenWidth <= _tabletScreenWidth
+                                    ? const EdgeInsets.all(4)
+                                    : const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    color: const Color(0xFFF7F9F9),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  '${postSnapshot.likes}',
+                                                  style: const TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold),
                                                 ),
-                                              ),
-                                            ],
+                                                const SizedBox(
+                                                  width: 8,
+                                                ),
+                                                IconButton(
+                                                  onPressed: () {
+                                                    LikeServices(
+                                                            context: context,
+                                                            id: postSnapshot.id,
+                                                            like: postSnapshot
+                                                                .likes,
+                                                            userId: auth
+                                                                .currentUser!
+                                                                .uid)
+                                                        .addLike();
+                                                  },
+                                                  icon: Icon(
+                                                    likers.contains({
+                                                      postSnapshot.id:
+                                                          auth.currentUser!.uid
+                                                    })
+                                                        ? Icons.favorite
+                                                        : Icons.favorite_border,
+                                                    color: Colors.red,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const Expanded(child: SizedBox()),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                    '${postSnapshot.ownerName}'),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                const Icon(Icons.person)
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const Padding(
+                                        padding: EdgeInsets.only(bottom: 4),
+                                        child: Divider(),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            4, 0, 4, 4),
+                                        child: Text("${postSnapshot.post}"),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Center(
+                                              child:
+                                                  Text("${postSnapshot.date}"),
+                                            ),
                                           ),
-                                          Text('${postSnapshot.ownerName}'),
-                                          const Icon(Icons.person)
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Center(
+                                              child: Text(
+                                                  "Comments: ${postSnapshot.commentCount}"),
+                                            ),
+                                          ),
                                         ],
                                       ),
-                                    ),
-                                    const Padding(
-                                      padding: EdgeInsets.only(bottom: 4),
-                                      child: Divider(),
-                                    ),
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.fromLTRB(4, 0, 4, 4),
-                                      child: Text("${postSnapshot.post}"),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Center(
-                                            child: Text("${postSnapshot.date}"),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Center(
-                                            child: Text(
-                                                "Comments: ${postSnapshot.commentCount}"),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),

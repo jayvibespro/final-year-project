@@ -23,9 +23,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   List<UserModel> userData = <UserModel>[];
 
-  Object? accountType = 1;
-
-  String account = 'Community';
+  String accountType = 'Community';
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -34,13 +32,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _nameController = TextEditingController();
 
   void _showBasicsFlash({
-    Duration? duration,
     flashStyle = FlashBehavior.floating,
     String? message,
   }) {
     showFlash(
       context: context,
-      duration: duration,
+      duration: const Duration(seconds: 4),
       builder: (context, controller) {
         return Padding(
           padding: const EdgeInsets.all(32.0),
@@ -121,7 +118,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
-                      decoration: InputDecoration(
+                      controller: _nameController,
+                      keyboardType: TextInputType.name,
+                      decoration: const InputDecoration(
                         prefixIcon: Icon(Icons.person_outline_rounded),
                         hintText: "    User name",
                         border: InputBorder.none,
@@ -148,7 +147,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
-                      decoration: InputDecoration(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
                         prefixIcon: Icon(Icons.mail_outline_outlined),
                         hintText: "    Email",
                         border: InputBorder.none,
@@ -175,7 +176,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
-                      decoration: InputDecoration(
+                      controller: _passwordController,
+                      obscureText: true,
+                      keyboardType: TextInputType.visiblePassword,
+                      decoration: const InputDecoration(
                         prefixIcon: Icon(Icons.key),
                         hintText: "    Password",
                         border: InputBorder.none,
@@ -203,6 +207,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
                       controller: _confirmPasswordController,
+                      obscureText: true,
+                      keyboardType: TextInputType.visiblePassword,
                       decoration: const InputDecoration(
                         prefixIcon: Icon(Icons.key),
                         hintText: "    Confirm password",
@@ -229,78 +235,70 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     isLoading = true;
                   });
 
-                  if (_passwordController.text !=
-                      _confirmPasswordController.text) {
-                    setState(() {
-                      isLoading = false;
-                    });
-                    _showBasicsFlash(
-                        duration: const Duration(seconds: 3),
-                        message: 'Password mismatch. please Try again.');
-                  }
-
                   if (_nameController.text != '' &&
+                      _confirmPasswordController.text != '' &&
                       _emailController.text != '' &&
                       _passwordController.text != '') {
-                    AuthServices(
-                      name: _nameController.text,
-                      email: _emailController.text,
-                      password: _passwordController.text,
-                      accountType: account,
-                    ).register();
-                  } else {
-                    setState(() {
-                      isLoading = false;
-                    });
-                    _showBasicsFlash(
-                        duration: const Duration(seconds: 3),
-                        message: 'Please fill all the credentials');
-                    return;
-                  }
+                    if (_passwordController.text !=
+                        _confirmPasswordController.text) {
+                      setState(() {
+                        isLoading = false;
+                      });
+                      _showBasicsFlash(
+                          message: 'Password mismatch. please Try again.');
+                    } else {
+                      AuthServices(
+                        email: _emailController.text,
+                        password: _passwordController.text,
+                      ).register().then((value) {
+                        Future.delayed(const Duration(seconds: 3));
+                        FirebaseAuth _auth = FirebaseAuth.instance;
+                        if (_auth.currentUser != null) {
+                          FirebaseFirestore.instance.collection('users').add({
+                            'name': _nameController.text,
+                            'email': auth.currentUser?.email,
+                            'user_id': auth.currentUser?.uid,
+                            'gender': '',
+                            'region': '',
+                            'phone': '',
+                            'profession': '',
+                            'facility': '',
+                            'id_number': '',
+                            'account_type': accountType,
+                            'avatar_url': '',
+                          });
 
-                  Future.delayed(const Duration(seconds: 3));
+                          _showBasicsFlash(
+                              message:
+                                  'Account Successfully created. You can now edit your profile information.');
 
-                  if (auth.currentUser != null) {
-                    try {
-                      _db
-                          .collection('users')
-                          .where('user_id', isEqualTo: auth.currentUser?.uid)
-                          .get()
-                          .then((element) {
-                        for (final DocumentSnapshot<Map<String, dynamic>> doc
-                            in element.docs) {
-                          userData
-                              .add(UserModel.fromDocumentSnapshot(doc: doc));
+                          setState(() {
+                            isLoading = false;
+                          });
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const ProfilePage()),
+                          );
+                        } else {
+                          setState(() {
+                            isLoading = false;
+                          });
+                          _showBasicsFlash(
+                              message:
+                                  'Failed to create account. Please try again.');
+                          return;
                         }
                       });
-                    } catch (e) {
-                      rethrow;
                     }
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ProfilePage()),
-                    );
-
-                    _showBasicsFlash(
-                        duration: const Duration(seconds: 3),
-                        message:
-                            'Account Successfully created. You can now edit your profile information.');
-
-                    setState(() {
-                      isLoading = false;
-                    });
-
-                    print(auth.currentUser?.uid);
                   } else {
                     setState(() {
                       isLoading = false;
                     });
-
                     _showBasicsFlash(
-                        duration: const Duration(seconds: 3),
-                        message: 'Error creating account. Please try again.');
+                        message: 'Please fill all the credentials');
+                    return;
                   }
                 },
                 child: Material(
@@ -310,14 +308,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     height: 65,
                     width: MediaQuery.of(context).size.width,
                     child: Center(
-                      child: Text(
-                        'Create an Account',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.5),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
+                      child: isLoading
+                          ? const CircularProgressIndicator()
+                          : Text(
+                              'Create an Account',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.5),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
                     ),
                     decoration: BoxDecoration(
                       color: Colors.deepPurple,
@@ -330,7 +330,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             Expanded(
               child: Center(
                 child: Text(
-                  'Or',
+                  '_____Or_____',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.5),
                     fontWeight: FontWeight.bold,
