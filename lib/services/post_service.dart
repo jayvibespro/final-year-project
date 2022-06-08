@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 class PostService {
   String? post;
@@ -9,7 +10,7 @@ class PostService {
   int? commentCount;
   String? ownerName;
   String? ownerId;
-  String? date;
+  String? date = DateFormat('MMM d, kk:mm').format(DateTime.now()).toString();
 
   PostService({
     this.likers,
@@ -19,7 +20,6 @@ class PostService {
     this.likes,
     this.ownerName,
     this.ownerId,
-    this.date,
   });
 
   addPost() async {
@@ -37,6 +37,32 @@ class PostService {
         'owner_name': _auth.currentUser?.email,
         'date': date,
       });
+    } catch (e) {
+      print('Failed to create a post.');
+      print(e);
+    }
+  }
+
+  updatePost() async {
+    try {
+      final FirebaseAuth _auth = FirebaseAuth.instance;
+
+      var editPost =
+          await FirebaseFirestore.instance.collection('posts').doc(id).update({
+        'post': post,
+      });
+    } catch (e) {
+      print('Failed to create a post.');
+      print(e);
+    }
+  }
+
+  deletePost() async {
+    try {
+      final FirebaseAuth _auth = FirebaseAuth.instance;
+
+      var deletePost =
+          await FirebaseFirestore.instance.collection('posts').doc(id).delete();
     } catch (e) {
       print('Failed to create a post.');
       print(e);

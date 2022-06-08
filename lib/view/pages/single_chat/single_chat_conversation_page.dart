@@ -19,6 +19,7 @@ class SingleChatConversation extends StatelessWidget {
       try {
         return _db
             .collection('single_chat')
+            // .orderBy('timestamp', descending: false)
             .where('members', arrayContains: auth.currentUser?.uid)
             .snapshots()
             .map((element) {

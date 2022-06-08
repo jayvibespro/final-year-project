@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:finalyearproject/models/user_model.dart';
 import 'package:finalyearproject/services/auth_services.dart';
-import 'package:finalyearproject/view/pages/profile/profile_page.dart';
+import 'package:finalyearproject/view/pages/profile/mobile_profile_page.dart';
 import 'package:finalyearproject/view/sign_in_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flash/flash.dart';
@@ -279,7 +279,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const ProfilePage()),
+                                builder: (context) =>
+                                    const MobileProfilePage()),
                           );
                         } else {
                           setState(() {

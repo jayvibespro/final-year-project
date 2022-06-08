@@ -141,6 +141,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         return _db
             .collection('single_chat')
             .where('members', arrayContains: auth.currentUser?.uid)
+            .orderBy('timestamp', descending: false)
             .snapshots()
             .map((element) {
           final List<SingleChatConversationModel> dataFromFireStore =
@@ -188,6 +189,7 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
         return _db
             .collection('group_chat')
             .where('members', arrayContains: auth.currentUser?.uid)
+            .orderBy('timestamp', descending: false)
             .snapshots()
             .map((element) {
           final List<GroupChatConversationModel> dataFromFireStore =
@@ -516,7 +518,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                           receiverName: receiverName,
                           receiverEmail: receiverEmail,
                           receiverImage: receiverImage,
-                          date: 'May 17, 02:33',
                           senderId: auth.currentUser!.uid,
                         ).sendMessage();
                       } else {
@@ -528,7 +529,6 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
                           receiverImage: receiverImage,
                           senderId: auth.currentUser!.uid,
                           message: _singleChatMessageController.text,
-                          date: 'May 17, 02:33',
                         ).createChat();
                       }
 

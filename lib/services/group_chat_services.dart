@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class GroupChatServices {
   String? id;
@@ -6,11 +7,10 @@ class GroupChatServices {
   String? groupAdmin;
   String? groupDescription;
   String? message;
-  String? date;
+  String? date = DateFormat('MMM d, kk:mm').format(DateTime.now()).toString();
   String? groupImage;
   String? groupName;
   List? members;
-  dynamic timeStamp;
 
   GroupChatServices({
     this.id,
@@ -18,11 +18,9 @@ class GroupChatServices {
     this.groupAdmin,
     this.groupName,
     this.message,
-    this.date,
     this.members,
     this.groupDescription,
     this.groupImage,
-    this.timeStamp,
   });
 
   createGroup() async {
@@ -30,6 +28,7 @@ class GroupChatServices {
       'members': members,
       'last_message': '',
       'last_date': '',
+      'timestamp': FieldValue.serverTimestamp(),
       'group_admin': groupAdmin,
       'group_description': groupDescription,
       'group_image': groupImage,
@@ -45,6 +44,7 @@ class GroupChatServices {
     await FirebaseFirestore.instance.collection('group_chat').doc(id).update({
       'last_message': message,
       'last_date': date,
+      'timestamp': FieldValue.serverTimestamp(),
     }).then((value) {
       FirebaseFirestore.instance
           .collection('group_chat')
@@ -54,7 +54,7 @@ class GroupChatServices {
         'message': message,
         'sender_id': senderId,
         'date': date,
-        'timestamp': timeStamp,
+        'timestamp': FieldValue.serverTimestamp(),
       });
     });
   }

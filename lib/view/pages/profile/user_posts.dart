@@ -2,23 +2,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:finalyearproject/models/posts_model.dart';
 import 'package:finalyearproject/services/like_services.dart';
 import 'package:finalyearproject/services/post_service.dart';
-import 'package:finalyearproject/widgets/app_bar.dart';
+import 'package:finalyearproject/view/pages/posts/comments_page.dart';
 import 'package:finalyearproject/widgets/drawer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import 'comments_page.dart';
-
-class PostsPage extends StatefulWidget {
-  const PostsPage({Key? key, required this.title}) : super(key: key);
+class UserPostsPage extends StatefulWidget {
+  const UserPostsPage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  State<PostsPage> createState() => _PostsPageState();
+  State<UserPostsPage> createState() => _UserPostsPageState();
 }
 
-class _PostsPageState extends State<PostsPage> {
+class _UserPostsPageState extends State<UserPostsPage> {
   bool isLike = false;
   List likers = [];
 
@@ -26,10 +24,11 @@ class _PostsPageState extends State<PostsPage> {
   final _db = FirebaseFirestore.instance;
   final FirebaseAuth auth = FirebaseAuth.instance;
 
-  Stream<List<PostsModel>> postStream() {
+  Stream<List<PostsModel>> userPostStream() {
     try {
       return _db
           .collection("posts")
+          .where('owner_id', isEqualTo: auth.currentUser!.uid)
           .orderBy('timestamp', descending: true)
           .snapshots()
           .map((element) {
@@ -61,6 +60,7 @@ class _PostsPageState extends State<PostsPage> {
     final _screenSize = MediaQuery.of(context).size.width;
     const _tabletScreenSize = 768;
     return Scaffold(
+      drawer: const CustomDrawer(),
       backgroundColor: const Color(0xFFF2F3F4),
       body: Container(
         width: double.infinity,
@@ -70,7 +70,7 @@ class _PostsPageState extends State<PostsPage> {
           children: <Widget>[
             Expanded(
               child: StreamBuilder<List<PostsModel>>(
-                stream: postStream(),
+                stream: userPostStream(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
                     return const Center(
@@ -179,7 +179,30 @@ class _PostsPageState extends State<PostsPage> {
                                             const SizedBox(
                                               width: 10,
                                             ),
-                                            const Icon(Icons.person)
+                                            const Icon(Icons.person),
+                                            const SizedBox(
+                                              width: 10,
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                editPostBottomSheets(
+                                                  context,
+                                                  postSnapshot.id,
+                                                  postSnapshot.post,
+                                                );
+                                              },
+                                              icon: const Icon(Icons.edit),
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                deletePostBottomSheets(
+                                                    context, postSnapshot.id);
+                                              },
+                                              icon: const Icon(
+                                                Icons.delete,
+                                                color: Colors.red,
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -238,25 +261,14 @@ class _PostsPageState extends State<PostsPage> {
                 },
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  addAdvanceBottomSheets(context);
-                },
-                child: const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('Create new post'),
-                ),
-              ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  addAdvanceBottomSheets(context) {
+  editPostBottomSheets(context, String postId, String post) {
+    _postController.text = post;
     final _screenWidth = MediaQuery.of(context).size.width;
     const _tabletScreenSize = 768;
     return showModalBottomSheet(
@@ -286,7 +298,7 @@ class _PostsPageState extends State<PostsPage> {
                         height: 10,
                       ),
                       const Text(
-                        'Create your post.',
+                        'Edit post.',
                         style: TextStyle(
                           fontSize: 20,
                         ),
@@ -334,9 +346,8 @@ class _PostsPageState extends State<PostsPage> {
                         onPressed: () {
                           PostService(
                             post: _postController.text,
-                            likes: 0,
-                            commentCount: 0,
-                          ).addPost();
+                            id: postId,
+                          ).updatePost();
 
                           setState(() {
                             _postController.clear();
@@ -346,8 +357,96 @@ class _PostsPageState extends State<PostsPage> {
                         },
                         child: const Padding(
                           padding: EdgeInsets.all(16.0),
-                          child: Text('Add Post'),
+                          child: Text('Done'),
                         ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        });
+//  await Future.delayed(Duration(seconds: 5));
+//  Navigator.pop(context);
+  }
+
+  deletePostBottomSheets(context, String postId) {
+    final _screenWidth = MediaQuery.of(context).size.width;
+    const _tabletScreenSize = 768;
+    return showModalBottomSheet(
+        backgroundColor: Colors.transparent,
+        context: context,
+        builder: (context) {
+          return Padding(
+            padding: _screenWidth <= _tabletScreenSize
+                ? const EdgeInsets.all(0)
+                : const EdgeInsets.symmetric(horizontal: 300, vertical: 0),
+            child: Container(
+              height: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(25.0),
+                  topRight: Radius.circular(25.0),
+                ),
+              ),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 32, 32, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      const Text(
+                        'Warning',
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      const Divider(),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      const Center(
+                        child: Text(
+                            'One post will be permanently deleted from your posts collection.'),
+                      ),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          OutlinedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text('Cancel'),
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              PostService(
+                                id: postId,
+                              ).deletePost();
+
+                              Navigator.pop(context);
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text('Delete'),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -361,14 +460,14 @@ class _PostsPageState extends State<PostsPage> {
   }
 }
 
-class PostsPageForMobile extends StatefulWidget {
-  PostsPageForMobile({Key? key}) : super(key: key);
+class UserPostsPageForMobile extends StatefulWidget {
+  UserPostsPageForMobile({Key? key}) : super(key: key);
 
   @override
-  State<PostsPageForMobile> createState() => _PostsPageForMobileState();
+  State<UserPostsPageForMobile> createState() => _UserPostsPageForMobileState();
 }
 
-class _PostsPageForMobileState extends State<PostsPageForMobile> {
+class _UserPostsPageForMobileState extends State<UserPostsPageForMobile> {
   bool isLike = false;
 
   List likers = [];
@@ -383,6 +482,7 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
     try {
       return _db
           .collection("posts")
+          .where('owner_id', isEqualTo: auth.currentUser!.uid)
           .orderBy('timestamp', descending: true)
           .snapshots()
           .map((element) {
@@ -415,7 +515,6 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
     const _tabletScreenWidth = 768;
     return Scaffold(
       drawer: const CustomDrawer(),
-      appBar: BaseAppBar(appBar: AppBar()),
       backgroundColor: const Color(0xFFF2F3F4),
       body: Container(
         width: double.infinity,
@@ -505,16 +604,40 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
                                                 ),
                                               ],
                                             ),
-                                            const Expanded(child: SizedBox()),
+                                            const Expanded(
+                                              child: SizedBox(),
+                                            ),
                                             Row(
                                               children: [
                                                 Text(
                                                     '${postSnapshot.ownerName}'),
-                                                SizedBox(
+                                                const SizedBox(
                                                   width: 10,
                                                 ),
                                                 const Icon(Icons.person)
                                               ],
+                                            ),
+                                            const SizedBox(
+                                              width: 10,
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                editPostBottomSheets(
+                                                    context,
+                                                    postSnapshot.id,
+                                                    postSnapshot.post);
+                                              },
+                                              icon: const Icon(Icons.edit),
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                deletePostBottomSheets(
+                                                    context, postSnapshot.id);
+                                              },
+                                              icon: const Icon(
+                                                Icons.delete,
+                                                color: Colors.red,
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -572,25 +695,14 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
                 },
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  addAdvanceBottomSheets(context);
-                },
-                child: const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('Create new post'),
-                ),
-              ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  addAdvanceBottomSheets(context) {
+  editPostBottomSheets(context, String postId, String post) {
+    _postController.text = post;
     final _screenWidth = MediaQuery.of(context).size.width;
     const _tabletScreenSize = 768;
     return showModalBottomSheet(
@@ -620,7 +732,7 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
                         height: 10,
                       ),
                       const Text(
-                        'Create your post.',
+                        'Edit post.',
                         style: TextStyle(
                           fontSize: 20,
                         ),
@@ -668,9 +780,8 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
                         onPressed: () {
                           PostService(
                             post: _postController.text,
-                            likes: 0,
-                            commentCount: 0,
-                          ).addPost();
+                            id: postId,
+                          ).updatePost();
 
                           setState(() {
                             _postController.clear();
@@ -680,8 +791,96 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
                         },
                         child: const Padding(
                           padding: EdgeInsets.all(16.0),
-                          child: Text('Add Post'),
+                          child: Text('Done'),
                         ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        });
+//  await Future.delayed(Duration(seconds: 5));
+//  Navigator.pop(context);
+  }
+
+  deletePostBottomSheets(context, String postId) {
+    final _screenWidth = MediaQuery.of(context).size.width;
+    const _tabletScreenSize = 768;
+    return showModalBottomSheet(
+        backgroundColor: Colors.transparent,
+        context: context,
+        builder: (context) {
+          return Padding(
+            padding: _screenWidth <= _tabletScreenSize
+                ? const EdgeInsets.all(0)
+                : const EdgeInsets.symmetric(horizontal: 300, vertical: 0),
+            child: Container(
+              height: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(25.0),
+                  topRight: Radius.circular(25.0),
+                ),
+              ),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 32, 32, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      const Text(
+                        'Warning',
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      const Divider(),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      const Center(
+                        child: Text(
+                            'One post will be permanently deleted from your posts collection.'),
+                      ),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          OutlinedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text('Cancel'),
+                            ),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              PostService(
+                                id: postId,
+                              ).deletePost();
+
+                              Navigator.pop(context);
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text('Delete'),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

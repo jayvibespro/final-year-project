@@ -26,6 +26,7 @@ class _GroupConversationState extends State<GroupConversationPage> {
         return _db
             .collection('group_chat')
             .where('members', arrayContains: auth.currentUser?.uid)
+            // .orderBy('timestamp', descending: false)
             .snapshots()
             .map((element) {
           final List<GroupChatConversationModel> dataFromFireStore =

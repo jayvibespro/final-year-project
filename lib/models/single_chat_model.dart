@@ -9,13 +9,15 @@ class SingleChatConversationModel {
   String lastMessage;
   String lastDate;
   List members;
+  dynamic timestamp;
 
   SingleChatConversationModel({
     required this.members,
     required this.receiverName,
+    required this.timestamp,
     required this.receiverEmail,
     required this.receiverId,
-        required this.lastMessage,
+    required this.lastMessage,
     required this.lastDate,
     required this.id,
     required this.receiverImage,
@@ -25,6 +27,7 @@ class SingleChatConversationModel {
       {required DocumentSnapshot<Map<String, dynamic>> doc}) {
     return SingleChatConversationModel(
       id: doc.id,
+      timestamp: doc.data()!['timestamp'],
       lastMessage: doc.data()!['last_message'],
       receiverImage: doc.data()!['receiver_image'],
       receiverEmail: doc.data()!['receiver_email'],

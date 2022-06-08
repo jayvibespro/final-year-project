@@ -219,7 +219,6 @@ class _StartChatPageState extends State<StartChatPage> {
                           receiverName: receiverName,
                           receiverEmail: receiverEmail,
                           receiverImage: receiverImage,
-                          date: 'May 17, 02:33',
                           senderId: auth.currentUser!.uid,
                         ).sendMessage();
                       } else {
@@ -231,7 +230,6 @@ class _StartChatPageState extends State<StartChatPage> {
                           receiverImage: receiverImage,
                           senderId: auth.currentUser!.uid,
                           message: _singleChatMessageController.text,
-                          date: 'May 17, 02:33',
                         ).createChat();
                       }
 

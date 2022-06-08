@@ -1,30 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class SingleChatServices {
   String? id;
   String? senderId;
   String? message;
-  String? date;
+  String? date = DateFormat('MMM d, kk:mm').format(DateTime.now()).toString();
   String? receiverId;
   String? receiverName;
   String? receiverImage;
   String? receiverEmail;
   List? members;
-  List? searchIndex;
-  dynamic timeStamp;
 
   SingleChatServices({
-    this.searchIndex,
     this.id,
     this.senderId,
     this.message,
-    this.date,
     this.members,
     this.receiverEmail,
     this.receiverId,
     this.receiverName,
     this.receiverImage,
-    this.timeStamp,
   });
 
   createChat() async {
@@ -32,11 +28,11 @@ class SingleChatServices {
       'members': members,
       'last_message': message,
       'last_date': date,
-      'receiver_id':receiverId,
+      'receiver_id': receiverId,
       'receiver_email': receiverEmail,
       'receiver_image': receiverImage,
       'receiver_name': receiverName,
-      'search_index': searchIndex,
+      'timestamp': FieldValue.serverTimestamp(),
     }).then((value) {
       FirebaseFirestore.instance
           .collection('single_chat')
@@ -46,7 +42,7 @@ class SingleChatServices {
         'message': message,
         'sender_id': senderId,
         'date': date,
-        'timestamp': timeStamp,
+        'timestamp': FieldValue.serverTimestamp(),
       });
     });
   }
@@ -55,6 +51,7 @@ class SingleChatServices {
     await FirebaseFirestore.instance.collection('single_chat').doc(id).update({
       'last_message': message,
       'last_date': date,
+      'timestamp': FieldValue.serverTimestamp(),
       'receiver_email': receiverEmail,
       'receiver_image': receiverImage,
       'receiver_name': receiverName,
@@ -67,7 +64,7 @@ class SingleChatServices {
         'message': message,
         'sender_id': senderId,
         'date': date,
-        'timestamp': timeStamp,
+        'timestamp': FieldValue.serverTimestamp(),
       });
     });
   }

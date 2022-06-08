@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:finalyearproject/models/comments_model.dart';
 import 'package:finalyearproject/models/posts_model.dart';
+import 'package:finalyearproject/view/pages/profile/mobile_profile_page.dart';
+import 'package:finalyearproject/view/pages/profile/profile_page.dart';
 import 'package:finalyearproject/widgets/app_bar.dart';
 import 'package:finalyearproject/widgets/drawer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../services/comments_services.dart';
-import '../profile/profile_page.dart';
 import '../single_chat/user_description_page.dart';
 
 class CommentsPage extends StatefulWidget {
@@ -181,7 +182,9 @@ class _CommentsPageState extends State<CommentsPage> {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) =>
-                                            const ProfilePage()),
+                                            _screenWidth < _tabletScreenWidth
+                                                ? const MobileProfilePage()
+                                                : const ProfilePage()),
                                   );
                                 } else {
                                   Navigator.push(

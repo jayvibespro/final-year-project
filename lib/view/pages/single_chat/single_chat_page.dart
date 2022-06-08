@@ -32,6 +32,7 @@ class _SingleChatMessagesPageState extends State<SingleChatMessagesPage> {
           .collection('single_chat')
           .doc(widget.singleChatConversationModel?.id)
           .collection('messages')
+          .orderBy('timestamp', descending: true)
           .snapshots()
           .map((element) {
         final List<SingleChatMessagesModel> dataFromFireStore =
@@ -53,7 +54,9 @@ class _SingleChatMessagesPageState extends State<SingleChatMessagesPage> {
     final _screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      drawer: _screenWidth < _tabletScreenWidth ? const CustomDrawer(): const SizedBox(),
+      drawer: _screenWidth < _tabletScreenWidth
+          ? const CustomDrawer()
+          : const SizedBox(),
       appBar: BaseAppBar(
         appBar: AppBar(),
       ),
@@ -235,8 +238,6 @@ class _SingleChatMessagesPageState extends State<SingleChatMessagesPage> {
                               widget.singleChatConversationModel?.receiverEmail,
                           receiverName:
                               widget.singleChatConversationModel?.receiverName,
-                          date: "12:33 PM",
-                          timeStamp: '',
                           senderId: auth.currentUser!.uid,
                         ).sendMessage();
 

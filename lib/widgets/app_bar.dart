@@ -3,6 +3,7 @@ import 'package:finalyearproject/models/user_model.dart';
 import 'package:finalyearproject/services/auth_services.dart';
 import 'package:finalyearproject/view/pages/chat_room.dart';
 import 'package:finalyearproject/view/pages/login_page.dart';
+import 'package:finalyearproject/view/pages/profile/mobile_profile_page.dart';
 import 'package:finalyearproject/view/pages/profile/profile_page.dart';
 import 'package:finalyearproject/view/sign_in_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -252,19 +253,16 @@ class _BaseAppBarState extends State<BaseAppBar> {
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const ProfilePage()));
+                          builder: (context) =>
+                              _screenWidth < _laptopScreenWidth
+                                  ? const MobileProfilePage()
+                                  : const ProfilePage()));
                 },
                 child: const Center(
                   child: Text('Profile'),
                 ),
               ),
               value: 4,
-            ),
-            const PopupMenuItem(
-              child: Center(
-                child: Text("Settings"),
-              ),
-              value: 5,
             ),
             PopupMenuItem(
               child: GestureDetector(
@@ -279,7 +277,7 @@ class _BaseAppBarState extends State<BaseAppBar> {
                         (route) => false);
                   },
                   child: const Center(child: Text("LogOut"))),
-              value: 6,
+              value: 5,
             ),
           ],
         ),

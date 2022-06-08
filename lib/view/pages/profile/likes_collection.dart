@@ -2,23 +2,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:finalyearproject/models/posts_model.dart';
 import 'package:finalyearproject/services/like_services.dart';
 import 'package:finalyearproject/services/post_service.dart';
-import 'package:finalyearproject/widgets/app_bar.dart';
+import 'package:finalyearproject/view/pages/posts/comments_page.dart';
 import 'package:finalyearproject/widgets/drawer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import 'comments_page.dart';
-
-class PostsPage extends StatefulWidget {
-  const PostsPage({Key? key, required this.title}) : super(key: key);
+class LikesPage extends StatefulWidget {
+  const LikesPage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  State<PostsPage> createState() => _PostsPageState();
+  State<LikesPage> createState() => _LikesPageState();
 }
 
-class _PostsPageState extends State<PostsPage> {
+class _LikesPageState extends State<LikesPage> {
   bool isLike = false;
   List likers = [];
 
@@ -26,10 +24,11 @@ class _PostsPageState extends State<PostsPage> {
   final _db = FirebaseFirestore.instance;
   final FirebaseAuth auth = FirebaseAuth.instance;
 
-  Stream<List<PostsModel>> postStream() {
+  Stream<List<PostsModel>> userPostStream() {
     try {
       return _db
           .collection("posts")
+          .where('likers', arrayContains: auth.currentUser!.uid)
           .orderBy('timestamp', descending: true)
           .snapshots()
           .map((element) {
@@ -61,6 +60,7 @@ class _PostsPageState extends State<PostsPage> {
     final _screenSize = MediaQuery.of(context).size.width;
     const _tabletScreenSize = 768;
     return Scaffold(
+      drawer: const CustomDrawer(),
       backgroundColor: const Color(0xFFF2F3F4),
       body: Container(
         width: double.infinity,
@@ -70,7 +70,7 @@ class _PostsPageState extends State<PostsPage> {
           children: <Widget>[
             Expanded(
               child: StreamBuilder<List<PostsModel>>(
-                stream: postStream(),
+                stream: userPostStream(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
                     return const Center(
@@ -238,18 +238,6 @@ class _PostsPageState extends State<PostsPage> {
                 },
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  addAdvanceBottomSheets(context);
-                },
-                child: const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('Create new post'),
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -361,14 +349,14 @@ class _PostsPageState extends State<PostsPage> {
   }
 }
 
-class PostsPageForMobile extends StatefulWidget {
-  PostsPageForMobile({Key? key}) : super(key: key);
+class LikesPageForMobile extends StatefulWidget {
+  LikesPageForMobile({Key? key}) : super(key: key);
 
   @override
-  State<PostsPageForMobile> createState() => _PostsPageForMobileState();
+  State<LikesPageForMobile> createState() => _LikesPageForMobileState();
 }
 
-class _PostsPageForMobileState extends State<PostsPageForMobile> {
+class _LikesPageForMobileState extends State<LikesPageForMobile> {
   bool isLike = false;
 
   List likers = [];
@@ -383,6 +371,7 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
     try {
       return _db
           .collection("posts")
+          .where('likers', arrayContains: auth.currentUser!.uid)
           .orderBy('timestamp', descending: true)
           .snapshots()
           .map((element) {
@@ -415,7 +404,6 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
     const _tabletScreenWidth = 768;
     return Scaffold(
       drawer: const CustomDrawer(),
-      appBar: BaseAppBar(appBar: AppBar()),
       backgroundColor: const Color(0xFFF2F3F4),
       body: Container(
         width: double.infinity,
@@ -510,7 +498,7 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
                                               children: [
                                                 Text(
                                                     '${postSnapshot.ownerName}'),
-                                                SizedBox(
+                                                const SizedBox(
                                                   width: 10,
                                                 ),
                                                 const Icon(Icons.person)
@@ -570,18 +558,6 @@ class _PostsPageForMobileState extends State<PostsPageForMobile> {
                     );
                   }
                 },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  addAdvanceBottomSheets(context);
-                },
-                child: const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('Create new post'),
-                ),
               ),
             ),
           ],

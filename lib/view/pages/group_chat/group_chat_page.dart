@@ -69,6 +69,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
           .collection('group_chat')
           .doc(widget.groupChatConversationModel?.id)
           .collection('messages')
+          .orderBy('timestamp', descending: true)
           .snapshots()
           .map((element) {
         final List<GroupChatMessagesModel> dataFromFireStore =
@@ -87,16 +88,19 @@ class _GroupChatPageState extends State<GroupChatPage> {
   @override
   Widget build(BuildContext context) {
     const _tabletScreenWidth = 768;
+    const _laptopScreenWidth = 1024;
     final _screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      drawer: _screenWidth < _tabletScreenWidth ? const CustomDrawer(): const SizedBox(),
+      drawer: _screenWidth < _tabletScreenWidth
+          ? const CustomDrawer()
+          : const SizedBox(),
       appBar: BaseAppBar(
         appBar: AppBar(),
       ),
       backgroundColor: const Color(0xFFF2F3F4),
       body: Padding(
-        padding: _screenWidth <= _tabletScreenWidth
+        padding: _screenWidth <= _laptopScreenWidth
             ? const EdgeInsets.symmetric(vertical: 0, horizontal: 0)
             : const EdgeInsets.symmetric(vertical: 0, horizontal: 300),
         child: Container(
@@ -237,12 +241,13 @@ class _GroupChatPageState extends State<GroupChatPage> {
                                     ),
                                   ),
                                 ),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
                                       vertical: 0, horizontal: 32),
                                   child: Text(
-                                    '12:12 AM',
-                                    style: TextStyle(color: Colors.black54),
+                                    '${messageSnapshot.date}',
+                                    style:
+                                        const TextStyle(color: Colors.black54),
                                   ),
                                 ),
                               ],
@@ -278,8 +283,6 @@ class _GroupChatPageState extends State<GroupChatPage> {
                         GroupChatServices(
                           id: widget.groupChatConversationModel?.id,
                           message: _messageController.text,
-                          date: '04:45 PM',
-                          timeStamp: '',
                           senderId: auth.currentUser!.uid,
                         ).sendMessage();
 
