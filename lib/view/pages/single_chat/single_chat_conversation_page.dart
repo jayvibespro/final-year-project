@@ -98,8 +98,10 @@ class SingleChatConversation extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         child: ListTile(
-                          title:
-                              Text('${userConversationSnapshot.receiverName}'),
+                          title: userConversationSnapshot.senderId ==
+                                  auth.currentUser!.uid
+                              ? Text('${userConversationSnapshot.receiverName}')
+                              : Text('${userConversationSnapshot.senderName}'),
                           subtitle:
                               Text('${userConversationSnapshot.lastMessage}'),
                           leading: const Icon(Icons.person),

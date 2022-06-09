@@ -29,7 +29,7 @@ class _LikesPageState extends State<LikesPage> {
       return _db
           .collection("posts")
           .where('likers', arrayContains: auth.currentUser!.uid)
-          .orderBy('timestamp', descending: true)
+          // .orderBy('timestamp', descending: true)
           .snapshots()
           .map((element) {
         final List<PostsModel> dataFromFireStore = <PostsModel>[];
@@ -372,7 +372,7 @@ class _LikesPageForMobileState extends State<LikesPageForMobile> {
       return _db
           .collection("posts")
           .where('likers', arrayContains: auth.currentUser!.uid)
-          .orderBy('timestamp', descending: true)
+          // .orderBy('timestamp', descending: true)
           .snapshots()
           .map((element) {
         final List<PostsModel> dataFromFireStore = <PostsModel>[];

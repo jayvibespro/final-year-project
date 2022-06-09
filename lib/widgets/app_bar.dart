@@ -198,9 +198,41 @@ class _BaseAppBarState extends State<BaseAppBar> {
         ),
         PopupMenuButton(
           color: Colors.white,
-          icon: const Icon(
-            Icons.person,
-            color: Colors.black,
+          child: StreamBuilder<List<UserModel>>(
+            stream: userStream(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (snapshot.hasError) {
+                return const Center(
+                  child: Text('An Error Occurred...'),
+                );
+              } else if (snapshot.hasData) {
+                var userSnapshot = snapshot.data!;
+                String name = '';
+                userSnapshot.forEach((element) {
+                  name = element.name;
+                });
+
+                return CircleAvatar(
+                  backgroundColor: Colors.grey[50],
+                  radius: 30,
+                  child: Text(
+                    '${name[0].toUpperCase()}',
+                    style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold),
+                  ),
+                );
+              } else {
+                return const Center(
+                  child: Text('An Error Occurred...'),
+                );
+              }
+            },
           ),
           itemBuilder: (context) => [
             const PopupMenuItem(

@@ -73,10 +73,14 @@ class _SingleChatMessagesPageState extends State<SingleChatMessagesPage> {
             children: <Widget>[
               InkWell(
                 child: Padding(
-                  padding: const EdgeInsets.all(32),
+                  padding: _screenWidth <= _tabletScreenWidth
+                      ? const EdgeInsets.all(0)
+                      : const EdgeInsets.all(32),
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: _screenWidth <= _tabletScreenWidth
+                          ? BorderRadius.circular(0)
+                          : BorderRadius.circular(20),
                       color: const Color(0xFFCCEEF9),
                     ),
                     height: 100,
@@ -101,15 +105,29 @@ class _SingleChatMessagesPageState extends State<SingleChatMessagesPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    '${widget.singleChatConversationModel?.receiverName}',
-                                    style: const TextStyle(fontSize: 20),
-                                  ),
-                                  Text(
-                                    '${widget.singleChatConversationModel?.receiverEmail}',
-                                    style:
-                                        const TextStyle(color: Colors.black54),
-                                  ),
+                                  widget.singleChatConversationModel
+                                              ?.senderId !=
+                                          auth.currentUser!.uid
+                                      ? Text(
+                                          '${widget.singleChatConversationModel?.senderName}',
+                                          style: const TextStyle(fontSize: 20),
+                                        )
+                                      : Text(
+                                          '${widget.singleChatConversationModel?.receiverName}',
+                                          style: const TextStyle(fontSize: 20),
+                                        ),
+                                  widget.singleChatConversationModel
+                                              ?.senderId !=
+                                          auth.currentUser!.uid
+                                      ? Text(
+                                          '${widget.singleChatConversationModel?.senderEmail}',
+                                          style: const TextStyle(fontSize: 20),
+                                        )
+                                      : Text(
+                                          '${widget.singleChatConversationModel?.receiverEmail}',
+                                          style: const TextStyle(
+                                              color: Colors.black54),
+                                        ),
                                 ],
                               ),
                             ],
@@ -134,8 +152,13 @@ class _SingleChatMessagesPageState extends State<SingleChatMessagesPage> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => ChatUserDescriptionPage(
-                                receiverId: widget
-                                    .singleChatConversationModel!.receiverId,
+                                receiverId: widget.singleChatConversationModel
+                                            ?.senderId !=
+                                        auth.currentUser!.uid
+                                    ? widget
+                                        .singleChatConversationModel?.senderId
+                                    : widget.singleChatConversationModel!
+                                        .receiverId,
                               )));
                 },
               ),
@@ -168,8 +191,8 @@ class _SingleChatMessagesPageState extends State<SingleChatMessagesPage> {
                                   : CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 16, horizontal: 32),
+                                  padding: const EdgeInsets.only(
+                                      top: 16, left: 32, right: 32),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: messageSnapshot.senderId ==
@@ -191,12 +214,13 @@ class _SingleChatMessagesPageState extends State<SingleChatMessagesPage> {
                                     ),
                                   ),
                                 ),
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 0, horizontal: 32),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 4, horizontal: 32),
                                   child: Text(
-                                    '12:12 AM',
-                                    style: TextStyle(color: Colors.black54),
+                                    '${messageSnapshot.date}',
+                                    style: const TextStyle(
+                                        color: Colors.black54, fontSize: 10),
                                   ),
                                 ),
                               ],
@@ -211,7 +235,7 @@ class _SingleChatMessagesPageState extends State<SingleChatMessagesPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(32.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
                     Expanded(

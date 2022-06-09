@@ -210,7 +210,31 @@ class _StartChatPageState extends State<StartChatPage> {
                         });
                       });
 
-                      print('receiver ID id $tempId');
+                      final List<UserModel> userData = <UserModel>[];
+                      String senderImage = '';
+                      String senderName = '';
+
+                      _db
+                          .collection('users')
+                          .where('user_id', isEqualTo: auth.currentUser?.uid)
+                          .snapshots()
+                          .map((element) {
+                        final List<UserModel> userData = <UserModel>[];
+                        for (final DocumentSnapshot<Map<String, dynamic>> doc
+                            in element.docs) {
+                          userData
+                              .add(UserModel.fromDocumentSnapshot(doc: doc));
+                        }
+                      });
+
+                      userData.forEach((element) {
+                        if (element.userId == auth.currentUser?.uid) {
+                          senderImage = element.avatarUrl;
+                          senderName = element.name;
+                        } else {
+                          return;
+                        }
+                      });
 
                       if (tempId != '') {
                         SingleChatServices(
@@ -229,6 +253,9 @@ class _StartChatPageState extends State<StartChatPage> {
                           receiverEmail: receiverEmail,
                           receiverImage: receiverImage,
                           senderId: auth.currentUser!.uid,
+                          senderEmail: auth.currentUser!.email,
+                          senderName: senderName,
+                          senderImage: senderImage,
                           message: _singleChatMessageController.text,
                         ).createChat();
                       }

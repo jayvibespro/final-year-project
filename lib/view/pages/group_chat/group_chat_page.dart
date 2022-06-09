@@ -111,10 +111,14 @@ class _GroupChatPageState extends State<GroupChatPage> {
             children: <Widget>[
               InkWell(
                 child: Padding(
-                  padding: const EdgeInsets.all(32),
+                  padding: _screenWidth <= _laptopScreenWidth
+                      ? const EdgeInsets.all(0)
+                      : const EdgeInsets.all(32),
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: _screenWidth <= _laptopScreenWidth
+                          ? BorderRadius.circular(0)
+                          : BorderRadius.circular(20),
                       color: const Color(0xFFCCEEF9),
                     ),
                     height: 100,
@@ -142,11 +146,13 @@ class _GroupChatPageState extends State<GroupChatPage> {
                                 children: [
                                   Text(
                                     '${widget.groupChatConversationModel?.groupName}',
-                                    style: const TextStyle(fontSize: 20),
+                                    style: const TextStyle(fontSize: 18),
                                   ),
                                   Flexible(
                                     child: Container(
-                                      width: 400,
+                                      width: _screenWidth <= _laptopScreenWidth
+                                          ? _screenWidth * 0.7
+                                          : 400,
                                       child: Text(
                                         '${widget.groupChatConversationModel?.groupDescription}',
                                         style: const TextStyle(
@@ -218,8 +224,8 @@ class _GroupChatPageState extends State<GroupChatPage> {
                                   : CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 16, horizontal: 32),
+                                  padding: const EdgeInsets.only(
+                                      top: 16, left: 32, right: 32),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: messageSnapshot.senderId ==
@@ -243,11 +249,11 @@ class _GroupChatPageState extends State<GroupChatPage> {
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      vertical: 0, horizontal: 32),
+                                      vertical: 4, horizontal: 32),
                                   child: Text(
                                     '${messageSnapshot.date}',
-                                    style:
-                                        const TextStyle(color: Colors.black54),
+                                    style: const TextStyle(
+                                        color: Colors.black54, fontSize: 10),
                                   ),
                                 ),
                               ],
@@ -262,7 +268,7 @@ class _GroupChatPageState extends State<GroupChatPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(32.0),
+                padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
                     Expanded(

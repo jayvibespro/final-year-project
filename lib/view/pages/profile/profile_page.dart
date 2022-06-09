@@ -36,11 +36,9 @@ class _ProfilePageState extends State<ProfilePage> {
     final _screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: const Color(0xFFF2F3F4),
-      appBar: _screenWidth <= _laptopScreen
-          ? BaseAppBar(
-              appBar: AppBar(),
-            )
-          : null,
+      appBar: BaseAppBar(
+        appBar: AppBar(),
+      ),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,

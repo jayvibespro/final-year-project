@@ -29,7 +29,7 @@ class _UserPostsPageState extends State<UserPostsPage> {
       return _db
           .collection("posts")
           .where('owner_id', isEqualTo: auth.currentUser!.uid)
-          .orderBy('timestamp', descending: true)
+          // .orderBy('timestamp', descending: true)
           .snapshots()
           .map((element) {
         final List<PostsModel> dataFromFireStore = <PostsModel>[];
@@ -483,7 +483,7 @@ class _UserPostsPageForMobileState extends State<UserPostsPageForMobile> {
       return _db
           .collection("posts")
           .where('owner_id', isEqualTo: auth.currentUser!.uid)
-          .orderBy('timestamp', descending: true)
+          // .orderBy('timestamp', descending: true)
           .snapshots()
           .map((element) {
         final List<PostsModel> dataFromFireStore = <PostsModel>[];

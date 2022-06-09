@@ -10,11 +10,17 @@ class SingleChatServices {
   String? receiverName;
   String? receiverImage;
   String? receiverEmail;
+  String? senderName;
+  String? senderEmail;
+  String? senderImage;
   List? members;
 
   SingleChatServices({
     this.id,
     this.senderId,
+    this.senderEmail,
+    this.senderName,
+    this.senderImage,
     this.message,
     this.members,
     this.receiverEmail,
@@ -28,6 +34,10 @@ class SingleChatServices {
       'members': members,
       'last_message': message,
       'last_date': date,
+      'sender_id': senderId,
+      'sender_email': senderEmail,
+      'sender_name': senderName,
+      'sender_image': senderImage,
       'receiver_id': receiverId,
       'receiver_email': receiverEmail,
       'receiver_image': receiverImage,
@@ -51,6 +61,7 @@ class SingleChatServices {
     await FirebaseFirestore.instance.collection('single_chat').doc(id).update({
       'last_message': message,
       'last_date': date,
+      'sender_id': senderId,
       'timestamp': FieldValue.serverTimestamp(),
       'receiver_email': receiverEmail,
       'receiver_image': receiverImage,

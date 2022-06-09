@@ -8,6 +8,10 @@ class SingleChatConversationModel {
   String receiverId;
   String lastMessage;
   String lastDate;
+  String senderId;
+  String senderName;
+  String senderEmail;
+  String senderImage;
   List members;
   dynamic timestamp;
 
@@ -15,6 +19,10 @@ class SingleChatConversationModel {
     required this.members,
     required this.receiverName,
     required this.timestamp,
+    required this.senderImage,
+    required this.senderName,
+    required this.senderEmail,
+    required this.senderId,
     required this.receiverEmail,
     required this.receiverId,
     required this.lastMessage,
@@ -33,6 +41,10 @@ class SingleChatConversationModel {
       receiverEmail: doc.data()!['receiver_email'],
       receiverName: doc.data()!['receiver_name'],
       receiverId: doc.data()!['receiver_id'],
+      senderImage: doc.data()!['sender_image'],
+      senderId: doc.data()!['sender_id'],
+      senderName: doc.data()!['sender_name'],
+      senderEmail: doc.data()!['sender_email'],
       lastDate: doc.data()!['last_date'],
       members: doc.data()!['members'],
     );
